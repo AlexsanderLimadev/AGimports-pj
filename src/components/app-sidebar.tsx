@@ -27,7 +27,8 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import logo from "@/assets/ag-imports-logo.png";
+import { AGLogo } from "@/components/brand-fx";
+import { useProximityEffect } from "@/hooks/use-proximity-effect";
 
 const groups: { label: string; items: { title: string; url: string; icon: any }[] }[] = [
   {
@@ -80,33 +81,32 @@ const groups: { label: string; items: { title: string; url: string; icon: any }[
 export function AppSidebar() {
   const path = useRouterState({ select: (r) => r.location.pathname });
   const isActive = (url: string) => (url === "/app" ? path === "/app" : path.startsWith(url));
+  const proximity = useProximityEffect({ radius: 90, falloff: "smooth", smoothingMs: 120 });
 
   return (
     <Sidebar collapsible="icon">
       <SidebarHeader>
-        <div className="flex items-center gap-2 px-2 py-3">
-          <img
-            src={logo}
-            alt="AG Imports"
-            className="h-9 w-9 shrink-0 rounded-full bg-white p-1 ring-1 ring-border object-cover"
-          />
+        <div className="flex items-center gap-2.5 px-2 py-3">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#0a0a0a] ring-1 ring-border">
+            <AGLogo size={22} rounded="rounded-md" />
+          </div>
           <div className="min-w-0 group-data-[collapsible=icon]:hidden">
             <div className="truncate text-sm font-semibold tracking-tight">AG Imports</div>
             <div className="truncate text-[11px] text-muted-foreground">ERP · Business Suite</div>
           </div>
         </div>
       </SidebarHeader>
-      <SidebarContent>
+      <SidebarContent onPointerMove={proximity.onPointerMove} onPointerLeave={proximity.onPointerLeave}>
         {groups.map((g) => (
           <SidebarGroup key={g.label}>
             <SidebarGroupLabel>{g.label}</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
                 {g.items.map((item) => (
-                  <SidebarMenuItem key={item.url}>
+                  <SidebarMenuItem key={item.url} ref={proximity.registerItem(item.url)} className="nav-proximity-item">
                     <SidebarMenuButton asChild isActive={isActive(item.url)} tooltip={item.title}>
                       <Link to={item.url} className="flex items-center gap-2">
-                        <item.icon className="h-4 w-4" />
+                        <item.icon className="nav-proximity-icon h-4 w-4" />
                         <span>{item.title}</span>
                       </Link>
                     </SidebarMenuButton>

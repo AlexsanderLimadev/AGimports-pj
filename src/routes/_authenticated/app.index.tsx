@@ -36,14 +36,15 @@ function Dashboard() {
       />
 
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-        <KpiCard label="SKUs ativos" value={num(data.activeSkus)} hint={`${num(data.totalSkus)} no total`} icon={<Package className="h-4 w-4" />} />
-        <KpiCard label="Unidades em estoque" value={num(data.totalUnits)} icon={<Box className="h-4 w-4" />} />
-        <KpiCard label="Valor do estoque (custo)" value={brl(data.stockValueCents)} icon={<Wallet className="h-4 w-4" />} />
-        <KpiCard label="Receita potencial" value={brl(data.potentialRevenueCents)} icon={<ShoppingBag className="h-4 w-4" />} />
-        <KpiCard label="Lucro potencial" value={brl(data.potentialProfitCents)} icon={<TrendingUp className="h-4 w-4" />} />
-        <KpiCard label="Estoque baixo" value={num(data.lowStock)} icon={<AlertTriangle className="h-4 w-4" />} />
-        <KpiCard label="Sem estoque" value={num(data.outOfStock)} icon={<AlertTriangle className="h-4 w-4" />} />
+        <KpiCard delayMs={0} label="SKUs ativos" value={num(data.activeSkus)} hint={`${num(data.totalSkus)} no total`} icon={<Package className="h-4 w-4" />} />
+        <KpiCard delayMs={30} label="Unidades em estoque" value={num(data.totalUnits)} icon={<Box className="h-4 w-4" />} />
+        <KpiCard delayMs={60} label="Valor do estoque (custo)" value={brl(data.stockValueCents)} icon={<Wallet className="h-4 w-4" />} />
+        <KpiCard delayMs={90} label="Receita potencial" value={brl(data.potentialRevenueCents)} icon={<ShoppingBag className="h-4 w-4" />} />
+        <KpiCard delayMs={120} label="Lucro potencial" value={brl(data.potentialProfitCents)} icon={<TrendingUp className="h-4 w-4" />} />
+        <KpiCard delayMs={150} label="Estoque baixo" value={num(data.lowStock)} icon={<AlertTriangle className="h-4 w-4" />} />
+        <KpiCard delayMs={180} label="Sem estoque" value={num(data.outOfStock)} icon={<AlertTriangle className="h-4 w-4" />} />
         <KpiCard
+          delayMs={210}
           label="Margem média"
           value={
             data.potentialRevenueCents > 0

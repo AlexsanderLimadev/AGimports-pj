@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { queryOptions, useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
+import { useVirtualizer } from "@tanstack/react-virtual";
 import { toast } from "sonner";
 import { Pencil, Plus, Search, Trash2 } from "lucide-react";
 import { PageHeader, SectionCard } from "@/components/ui-bits";
@@ -89,6 +90,22 @@ function ProdutosPage() {
     );
   }, [products, q]);
 
+  // Virtualização: com catálogos grandes (centenas de SKUs), renderizar
+  // toda a tabela de uma vez trava a rolagem. Só desenha as linhas que
+  // realmente estão visíveis na tela + uma margem (overscan), mantendo o
+  // scroll leve independente de quantos produtos existirem.
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const rowVirtualizer = useVirtualizer({
+    count: filtered.length,
+    getScrollElement: () => scrollRef.current,
+    estimateSize: () => 45,
+    overscan: 12,
+  });
+  const virtualRows = rowVirtualizer.getVirtualItems();
+  const paddingTop = virtualRows.length > 0 ? virtualRows[0].start : 0;
+  const paddingBottom =
+    virtualRows.length > 0 ? rowVirtualizer.getTotalSize() - virtualRows[virtualRows.length - 1].end : 0;
+
   const invalidate = () => {
     qc.invalidateQueries({ queryKey: ["products"] });
     qc.invalidateQueries({ queryKey: ["dashboard-stats"] });
@@ -141,9 +158,9 @@ function ProdutosPage() {
             )}
           </div>
         ) : (
-          <div className="-mx-4 overflow-x-auto">
+          <div ref={scrollRef} className="-mx-4 max-h-[70vh] overflow-auto">
             <table className="w-full min-w-[900px] text-sm">
-              <thead className="text-left text-xs text-muted-foreground">
+              <thead className="sticky top-0 z-10 bg-card text-left text-xs text-muted-foreground">
                 <tr className="border-b border-border">
                   <th className="px-4 py-2 font-medium">SKU</th>
                   <th className="px-4 py-2 font-medium">Produto</th>
@@ -157,7 +174,13 @@ function ProdutosPage() {
                 </tr>
               </thead>
               <tbody>
-                {filtered.map((p) => {
+                {paddingTop > 0 && (
+                  <tr aria-hidden="true" style={{ height: paddingTop }}>
+                    <td colSpan={9} />
+                  </tr>
+                )}
+                {virtualRows.map((virtualRow) => {
+                  const p = filtered[virtualRow.index];
                   const margem =
                     p.price_cents > 0 ? ((p.price_cents - p.cost_cents) / p.price_cents) * 100 : 0;
                   const low = p.stock_qty <= p.min_stock;
@@ -215,6 +238,11 @@ function ProdutosPage() {
                     </tr>
                   );
                 })}
+                {paddingBottom > 0 && (
+                  <tr aria-hidden="true" style={{ height: paddingBottom }}>
+                    <td colSpan={9} />
+                  </tr>
+                )}
               </tbody>
             </table>
           </div>

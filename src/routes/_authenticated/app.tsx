@@ -1,4 +1,4 @@
-import { createFileRoute, Outlet, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
 import { Bell, LogOut, Search } from "lucide-react";
 import { useEffect, useState } from "react";
 import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
@@ -21,6 +21,7 @@ export const Route = createFileRoute("/_authenticated/app")({
 
 function AppLayout() {
   const navigate = useNavigate();
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
   const [email, setEmail] = useState<string>("");
 
   useEffect(() => {
@@ -71,7 +72,9 @@ function AppLayout() {
             </div>
           </header>
           <main className="min-w-0 flex-1 p-4 sm:p-6 lg:p-8">
-            <Outlet />
+            <div key={pathname} className="fade-in-up">
+              <Outlet />
+            </div>
           </main>
         </SidebarInset>
       </div>

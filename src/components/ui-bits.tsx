@@ -11,6 +11,7 @@ export function KpiCard({
   hint,
   tone = "neutral",
   className,
+  delayMs,
 }: {
   label: string;
   value: ReactNode;
@@ -19,6 +20,8 @@ export function KpiCard({
   hint?: string;
   tone?: "neutral" | "success" | "warning" | "destructive";
   className?: string;
+  /** Quando informado, o card entra com fade-in-up atrasado (cascata/stagger). */
+  delayMs?: number;
 }) {
   const up = (delta ?? 0) >= 0;
   const toneText =
@@ -31,8 +34,10 @@ export function KpiCard({
           : "text-foreground";
   return (
     <div
+      style={delayMs !== undefined ? { animationDelay: `${delayMs}ms` } : undefined}
       className={cn(
         "group rounded-xl border border-border bg-card p-4 transition-[border-color,transform] duration-200 ease-out hover:border-foreground/20 motion-safe:hover:-translate-y-px",
+        delayMs !== undefined && "fade-in-up",
         className,
       )}
     >
@@ -95,7 +100,12 @@ export function SectionCard({
   className?: string;
 }) {
   return (
-    <div className={cn("rounded-xl border border-border bg-card", className)}>
+    <div
+      className={cn(
+        "rounded-xl border border-border bg-card transition-colors duration-200 ease-out hover:border-foreground/15",
+        className,
+      )}
+    >
       {(title || actions) && (
         <div className="flex flex-col gap-2 border-b border-border px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="min-w-0">
