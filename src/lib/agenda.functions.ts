@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
+import { enforceRateLimit } from "@/lib/rate-limit.server";
 
 const EVENTO_TIPOS = ["compromisso", "entrega", "cobranca", "reposicao", "reuniao", "outro"] as const;
 const EVENTO_STATUS = ["pendente", "concluido", "cancelado"] as const;
@@ -39,6 +40,7 @@ export const createEvento = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => eventoSchema.parse(d))
   .handler(async ({ data, context }) => {
+    await enforceRateLimit(context.supabase, context.userId, "createEvento", 60);
     const payload = { ...data, user_id: context.userId, ends_at: data.ends_at || null };
     const { data: row, error } = await context.supabase
       .from("eventos")

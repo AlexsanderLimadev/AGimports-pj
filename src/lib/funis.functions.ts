@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
+import { enforceRateLimit } from "@/lib/rate-limit.server";
 
 const PALETTE = [
   "var(--color-chart-1)",
@@ -81,6 +82,7 @@ export const createFunil = createServerFn({ method: "POST" })
       .parse(d),
   )
   .handler(async ({ data, context }) => {
+    await enforceRateLimit(context.supabase, context.userId, "createFunil", 30);
     const slug = slugify(data.nome);
     const { data: funil, error } = await context.supabase
       .from("funis")

@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
+import { enforceRateLimit } from "@/lib/rate-limit.server";
 
 const campanhaSchema = z.object({
   nome: z.string().trim().min(1).max(160),
@@ -30,6 +31,7 @@ export const createCampanha = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => campanhaSchema.parse(d))
   .handler(async ({ data, context }) => {
+    await enforceRateLimit(context.supabase, context.userId, "createCampanha", 40);
     const { data: row, error } = await context.supabase
       .from("campanhas")
       .insert({ ...data, user_id: context.userId })

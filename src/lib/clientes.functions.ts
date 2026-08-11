@@ -5,9 +5,9 @@ import { enforceRateLimit } from "@/lib/rate-limit.server";
 import { withCapture } from "@/lib/observability.server";
 
 
-const clienteSchema = z.object({
+export const clienteSchema = z.object({
   nome: z.string().trim().min(1).max(200),
-  email: z.string().trim().max(200).optional().nullable(),
+  email: z.string().trim().max(200).email("E-mail inválido").optional().nullable().or(z.literal("")),
   telefone: z.string().max(40).optional().nullable(),
   documento: z.string().max(40).optional().nullable(),
   tags: z.array(z.string().max(40)).default([]),

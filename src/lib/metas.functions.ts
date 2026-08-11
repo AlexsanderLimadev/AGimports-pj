@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
+import { enforceRateLimit } from "@/lib/rate-limit.server";
 
 const META_TIPOS = ["faturamento", "pedidos", "clientes", "lucro", "ticket_medio"] as const;
 const META_PERIODOS = ["mes", "trimestre", "ano"] as const;
@@ -86,6 +87,7 @@ export const createMeta = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => metaSchema.parse(d))
   .handler(async ({ data, context }) => {
+    await enforceRateLimit(context.supabase, context.userId, "createMeta", 40);
     const { data: row, error } = await context.supabase
       .from("metas")
       .insert({ ...data, user_id: context.userId, atual: 0 })

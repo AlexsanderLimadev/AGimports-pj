@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
+import { enforceRateLimit } from "@/lib/rate-limit.server";
 
 // ---------- CATEGORIES ----------
 export const listCategories = createServerFn({ method: "GET" })
@@ -18,6 +19,7 @@ export const createCategory = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => z.object({ name: z.string().trim().min(1).max(80) }).parse(d))
   .handler(async ({ data, context }) => {
+    await enforceRateLimit(context.supabase, context.userId, "createCategory", 40);
     const { data: row, error } = await context.supabase
       .from("categories")
       .insert({ name: data.name, user_id: context.userId })
@@ -40,7 +42,7 @@ export const listSuppliers = createServerFn({ method: "GET" })
   });
 
 // ---------- PRODUCTS ----------
-const productSchema = z.object({
+export const productSchema = z.object({
   sku: z.string().trim().min(1).max(64),
   name: z.string().trim().min(1).max(200),
   description: z.string().max(2000).optional().nullable(),
@@ -74,6 +76,7 @@ export const createProduct = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => productSchema.parse(d))
   .handler(async ({ data, context }) => {
+    await enforceRateLimit(context.supabase, context.userId, "createProduct", 40);
     const payload = { ...data, user_id: context.userId, image_url: data.image_url || null };
     const { data: row, error } = await context.supabase
       .from("products")
@@ -138,6 +141,7 @@ export const createMovement = createServerFn({ method: "POST" })
       .parse(d),
   )
   .handler(async ({ data, context }) => {
+    await enforceRateLimit(context.supabase, context.userId, "createMovement", 60);
     const { error } = await context.supabase
       .from("stock_movements")
       .insert({ ...data, user_id: context.userId });

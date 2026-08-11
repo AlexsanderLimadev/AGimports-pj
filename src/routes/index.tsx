@@ -275,7 +275,7 @@ function Landing() {
         </form>
 
         <p className="anim-up mt-5 max-w-md text-[14px] leading-relaxed text-white/35" style={{ animationDelay: "360ms" }}>
-          Gestão premium de importados — vendas, estoque, financeiro e
+          Gestão premium de importados: vendas, estoque, financeiro e
           <br />
           marketing com indicadores em tempo real.
         </p>

@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
+import { enforceRateLimit } from "@/lib/rate-limit.server";
 
 const automacaoSchema = z.object({
   nome: z.string().trim().min(1).max(160),
@@ -27,6 +28,7 @@ export const createAutomacao = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => automacaoSchema.parse(d))
   .handler(async ({ data, context }) => {
+    await enforceRateLimit(context.supabase, context.userId, "createAutomacao", 40);
     const { data: row, error } = await context.supabase
       .from("automacoes")
       .insert({ ...data, config: data.config as never, user_id: context.userId })
