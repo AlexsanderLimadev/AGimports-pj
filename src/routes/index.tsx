@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState, useLayoutEffect, type ReactNode } from "react";
 import {
   ArrowRight, ArrowUp, Menu, X, Activity, Monitor, PanelLeftClose,
@@ -7,6 +7,8 @@ import {
 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { AGLogo, Grain, Grid, useMouseRel } from "@/components/brand-fx";
+import { InteractiveHoverButton } from "@/components/ui/interactive-hover-button";
+import { ContainerScroll } from "@/components/ui/container-scroll-animation";
 
 export const Route = createFileRoute("/")({
   component: Landing,
@@ -175,6 +177,7 @@ function DashMockup() {
 }
 
 function Landing() {
+  const navigate = useNavigate();
   const [signedIn, setSignedIn] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [searchVal, setSearchVal] = useState("");
@@ -213,12 +216,13 @@ function Landing() {
       <nav className="anim-down relative z-20 flex items-center justify-between px-5 py-4 sm:px-8 lg:px-10">
         <Brand />
         <div className="flex items-center gap-2">
-          <Link
-            to={cta}
-            className="hidden sm:flex items-center gap-1.5 rounded-full bg-white px-5 py-2 text-[13px] font-medium text-black hover:bg-white/90 transition-colors duration-150"
-          >
-            {ctaLabel} <ArrowRight size={13} />
-          </Link>
+          <div className="hidden sm:block">
+            <InteractiveHoverButton
+              text={ctaLabel}
+              onClick={() => navigate({ to: cta })}
+              className="w-auto border-white/20 bg-white px-5 py-2 text-black [--primary:black] [--primary-foreground:white]"
+            />
+          </div>
           <button
             onClick={() => setMobileOpen(!mobileOpen)}
             className="sm:hidden w-9 h-9 rounded-full text-white/60 hover:bg-white/[0.1] flex items-center justify-center transition-colors"
@@ -237,71 +241,70 @@ function Landing() {
 
       <div className="flex-1 min-h-8 sm:min-h-12 lg:min-h-14 shrink-0" />
 
-      <div className="relative z-10 flex flex-col items-center text-center px-5">
-        <div className="anim-up mb-6 inline-flex items-center gap-2 rounded-full border border-white/[0.12] bg-white/[0.06] px-4 py-1.5 backdrop-blur-sm">
-          <Activity size={11} className="text-white/45" />
-          <span className="text-[10px] tracking-[0.18em] text-white/45" style={{ fontFamily: "var(--font-mono)" }}>
-            ERP · CRM · BI · FUNIS
-          </span>
-        </div>
+      <ContainerScroll
+        titleComponent={
+          <div className="relative z-10 flex flex-col items-center px-5 text-center">
+            <div className="anim-up mb-6 inline-flex items-center gap-2 rounded-full border border-white/[0.12] bg-white/[0.06] px-4 py-1.5 backdrop-blur-sm">
+              <Activity size={11} className="text-white/45" />
+              <span className="text-[10px] tracking-[0.18em] text-white/45" style={{ fontFamily: "var(--font-mono)" }}>
+                ERP · CRM · BI · FUNIS
+              </span>
+            </div>
 
-        <h1 className="text-white font-semibold leading-[1.06] tracking-[-0.03em]" style={{ fontSize: "clamp(2.5rem,7vw,5rem)" }}>
-          <span className="block anim-up" style={{ animationDelay: "40ms" }}>Toda a operação</span>
-          <span className="block anim-up text-white/40" style={{ animationDelay: "120ms" }}>em um só lugar.</span>
-        </h1>
+            <h1 className="text-white font-semibold leading-[1.06] tracking-[-0.03em]" style={{ fontSize: "clamp(2.5rem,7vw,5rem)" }}>
+              <span className="block anim-up" style={{ animationDelay: "40ms" }}>Toda a operação</span>
+              <span className="block anim-up text-white/40" style={{ animationDelay: "120ms" }}>em um só lugar.</span>
+            </h1>
 
-        <form
-          className="anim-up mt-7 w-full max-w-lg"
-          style={{ animationDelay: "240ms" }}
-          onSubmit={(e) => {
-            e.preventDefault();
-            window.location.href = cta;
-          }}
-        >
-          <div className="flex items-center gap-3 rounded-full bg-white/[0.08] backdrop-blur-md ring-1 ring-white/[0.12] pl-5 pr-1.5 py-1.5">
-            <input
-              value={searchVal}
-              onChange={(e) => setSearchVal(e.target.value)}
-              placeholder="Buscar produto, pedido ou cliente..."
-              className="flex-1 bg-transparent text-[13px] text-white/80 placeholder:text-white/30 outline-none py-2"
-            />
-            <button
-              type="submit"
-              className="w-9 h-9 rounded-full bg-white text-black flex items-center justify-center shrink-0 hover:scale-105 active:scale-95 transition-transform"
+            <form
+              className="anim-up mt-7 w-full max-w-lg"
+              style={{ animationDelay: "240ms" }}
+              onSubmit={(e) => {
+                e.preventDefault();
+                window.location.href = cta;
+              }}
             >
-              <ArrowUp size={15} />
-            </button>
+              <div className="flex items-center gap-3 rounded-full bg-white/[0.08] backdrop-blur-md ring-1 ring-white/[0.12] pl-5 pr-1.5 py-1.5">
+                <input
+                  value={searchVal}
+                  onChange={(e) => setSearchVal(e.target.value)}
+                  placeholder="Buscar produto, pedido ou cliente..."
+                  className="flex-1 bg-transparent text-[13px] text-white/80 placeholder:text-white/30 outline-none py-2"
+                />
+                <button
+                  type="submit"
+                  className="w-9 h-9 rounded-full bg-white text-black flex items-center justify-center shrink-0 hover:scale-105 active:scale-95 transition-transform"
+                >
+                  <ArrowUp size={15} />
+                </button>
+              </div>
+            </form>
+
+            <p className="anim-up mt-5 max-w-md text-[14px] leading-relaxed text-white/35" style={{ animationDelay: "360ms" }}>
+              Gestão premium de importados: vendas, estoque, financeiro e
+              <br />
+              marketing com indicadores em tempo real.
+            </p>
+
+            <div className="anim-up mt-5 flex flex-wrap items-center justify-center gap-3" style={{ animationDelay: "460ms" }}>
+              <InteractiveHoverButton
+                text={signedIn ? "Acessar painel" : "Criar conta"}
+                onClick={() => navigate({ to: cta })}
+                className="w-auto border-white/20 bg-white px-6 py-2.5 text-black [--primary:black] [--primary-foreground:white]"
+              />
+              <a href="#modulos" className="rounded-full ring-1 ring-white/20 px-6 py-2.5 text-[13px] text-white/55 hover:bg-white/[0.07] transition-colors">
+                Ver módulos
+              </a>
+            </div>
           </div>
-        </form>
-
-        <p className="anim-up mt-5 max-w-md text-[14px] leading-relaxed text-white/35" style={{ animationDelay: "360ms" }}>
-          Gestão premium de importados: vendas, estoque, financeiro e
-          <br />
-          marketing com indicadores em tempo real.
-        </p>
-
-        <div className="anim-up mt-5 flex flex-wrap items-center justify-center gap-3" style={{ animationDelay: "460ms" }}>
-          <Link to={cta} className="rounded-full bg-white px-6 py-2.5 text-[13px] font-medium text-black hover:bg-white/90 transition-colors">
-            {signedIn ? "Acessar painel" : "Criar conta"}
-          </Link>
-          <a href="#modulos" className="rounded-full ring-1 ring-white/20 px-6 py-2.5 text-[13px] text-white/55 hover:bg-white/[0.07] transition-colors">
-            Ver módulos
-          </a>
-        </div>
-      </div>
-
-      <div className="flex-1 min-h-10 sm:min-h-14 lg:min-h-20 shrink-0" />
-
-      <div
-        className="anim-rise relative z-[5] w-[92%] sm:w-[84%] lg:w-[74%] max-w-[900px] mx-auto shrink-0 -mb-10 sm:-mb-20 lg:-mb-32"
-        style={{ animationDelay: "600ms" }}
+        }
       >
         <ScaledMockup designW={860}>
           <DashMockup />
         </ScaledMockup>
-      </div>
+      </ContainerScroll>
 
-      <div id="modulos" className="relative z-10 mx-auto mt-32 w-full max-w-5xl px-5 pb-24 pt-40 sm:pt-56">
+      <div id="modulos" className="relative z-10 mx-auto -mt-64 w-full max-w-5xl px-5 pb-24 pt-40 sm:-mt-96 sm:pt-56">
         <div className="grid grid-cols-2 gap-px overflow-hidden rounded-xl ring-1 ring-white/[0.08] sm:grid-cols-4">
           {MODULOS.map(([t, d]) => (
             <div key={t} className="bg-white/[0.03] p-4 text-left backdrop-blur-sm">
