@@ -3,12 +3,21 @@ import { useEffect, useRef, useState, useLayoutEffect, type ReactNode } from "re
 import {
   ArrowRight, ArrowUp, Menu, X, Activity, Monitor, PanelLeftClose,
   ChevronLeft, ChevronRight, RotateCw, Share, Plus, Copy, LayoutDashboard,
-  Package, Boxes, ListTodo,
+  Package, Boxes, ListTodo, MoreVertical, UserPlus, Users,
 } from "lucide-react";
+import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { resolveSearch } from "@/lib/search-routes";
 import { AGLogo, Grain, Grid, useMouseRel } from "@/components/brand-fx";
-import { InteractiveHoverButton } from "@/components/ui/interactive-hover-button";
 import { ContainerScroll } from "@/components/ui/container-scroll-animation";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export const Route = createFileRoute("/")({
   component: Landing,
@@ -179,14 +188,24 @@ function DashMockup() {
 function Landing() {
   const navigate = useNavigate();
   const [signedIn, setSignedIn] = useState(false);
+  const [userEmail, setUserEmail] = useState<string | null>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [searchVal, setSearchVal] = useState("");
   const pageRef = useRef<HTMLDivElement>(null);
   const mousePos = useMouseRel(pageRef);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => setSignedIn(!!data.session));
+    supabase.auth.getSession().then(({ data }) => {
+      setSignedIn(!!data.session);
+      setUserEmail(data.session?.user.email ?? null);
+    });
   }, []);
+
+  // "Minhas contas": hoje o sistema só suporta 1 conta por login — a troca
+  // entre até 3 empresas por usuário ainda não foi implementada no banco
+  // (é uma mudança de arquitetura maior, escopada à parte). Por enquanto
+  // mostramos só a conta real e atual, sem fingir uma função que não existe.
+  const accounts = signedIn && userEmail ? [{ id: "current", label: userEmail, active: true }] : [];
 
   const cta = signedIn ? "/app" : "/auth";
   const ctaLabel = signedIn ? "Ir ao painel" : "Entrar";
@@ -216,13 +235,57 @@ function Landing() {
       <nav className="anim-down relative z-20 flex items-center justify-between px-5 py-4 sm:px-8 lg:px-10">
         <Brand />
         <div className="flex items-center gap-2">
-          <div className="hidden sm:block">
-            <InteractiveHoverButton
-              text={ctaLabel}
-              onClick={() => navigate({ to: cta })}
-              className="w-auto border-white/20 bg-white px-5 py-2 text-black [--primary:black] [--primary-foreground:white]"
-            />
-          </div>
+          <Link
+            to={cta}
+            className="hidden sm:flex items-center gap-1.5 rounded-full bg-white px-5 py-2 text-[13px] font-medium text-black hover:bg-white/90 transition-colors duration-150"
+          >
+            {ctaLabel} <ArrowRight size={13} />
+          </Link>
+
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button
+                aria-label="Mais opções de conta"
+                className="flex h-9 w-9 items-center justify-center rounded-full text-white/60 transition-colors hover:bg-white/[0.1] hover:text-white/90"
+              >
+                <MoreVertical size={16} />
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-64 border-white/10 bg-[#141416] text-white/80">
+              <DropdownMenuItem asChild className="cursor-pointer focus:bg-white/[0.08] focus:text-white">
+                <Link to="/app" className="flex items-center gap-2">
+                  <LayoutDashboard size={14} className="text-white/40" /> Acessar meu painel
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild className="cursor-pointer focus:bg-white/[0.08] focus:text-white">
+                <Link to="/auth" search={{ mode: "signup" }} className="flex items-center gap-2">
+                  <UserPlus size={14} className="text-white/40" /> Criar conta
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator className="bg-white/10" />
+              <DropdownMenuLabel className="text-[10px] uppercase tracking-wider text-white/30" style={{ fontFamily: "var(--font-mono)" }}>
+                Minhas contas ({accounts.length}/3)
+              </DropdownMenuLabel>
+              {accounts.map((acc) => (
+                <DropdownMenuItem
+                  key={acc.id}
+                  disabled
+                  className="flex items-center justify-between text-white/50 opacity-70"
+                >
+                  <span className="flex items-center gap-2">
+                    <Users size={14} className="text-white/30" /> {acc.label}
+                  </span>
+                  {acc.active && <span className="text-[10px] text-white/30">atual</span>}
+                </DropdownMenuItem>
+              ))}
+              {accounts.length < 3 && (
+                <DropdownMenuItem disabled className="flex items-center gap-2 text-white/30">
+                  <Plus size={14} /> Adicionar outra empresa (em breve)
+                </DropdownMenuItem>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
+
           <button
             onClick={() => setMobileOpen(!mobileOpen)}
             className="sm:hidden w-9 h-9 rounded-full text-white/60 hover:bg-white/[0.1] flex items-center justify-center transition-colors"
@@ -261,7 +324,22 @@ function Landing() {
               style={{ animationDelay: "240ms" }}
               onSubmit={(e) => {
                 e.preventDefault();
-                window.location.href = cta;
+                const q = searchVal.trim();
+                if (!q) return;
+
+                const match = resolveSearch(q);
+                if (!match) {
+                  toast.error(`Não encontrei nada pra "${q}". Tenta produtos, pedidos, clientes, estoque...`);
+                  return;
+                }
+                if (!signedIn) {
+                  toast.message("Você ainda não tem uma conta", {
+                    description: `Crie uma conta pra acessar ${match.label}.`,
+                  });
+                  navigate({ to: "/auth", search: { mode: "signup" } });
+                  return;
+                }
+                navigate({ to: match.path });
               }}
             >
               <div className="flex items-center gap-3 rounded-full bg-white/[0.08] backdrop-blur-md ring-1 ring-white/[0.12] pl-5 pr-1.5 py-1.5">
@@ -287,11 +365,9 @@ function Landing() {
             </p>
 
             <div className="anim-up mt-5 flex flex-wrap items-center justify-center gap-3" style={{ animationDelay: "460ms" }}>
-              <InteractiveHoverButton
-                text={signedIn ? "Acessar painel" : "Criar conta"}
-                onClick={() => navigate({ to: cta })}
-                className="w-auto border-white/20 bg-white px-6 py-2.5 text-black [--primary:black] [--primary-foreground:white]"
-              />
+              <Link to={cta} className="rounded-full bg-white px-6 py-2.5 text-[13px] font-medium text-black hover:bg-white/90 transition-colors">
+                {signedIn ? "Acessar painel" : "Criar conta"}
+              </Link>
               <a href="#modulos" className="rounded-full ring-1 ring-white/20 px-6 py-2.5 text-[13px] text-white/55 hover:bg-white/[0.07] transition-colors">
                 Ver módulos
               </a>
@@ -305,6 +381,22 @@ function Landing() {
       </ContainerScroll>
 
       <div id="modulos" className="relative z-10 mx-auto -mt-64 w-full max-w-5xl px-5 pb-24 pt-40 sm:-mt-96 sm:pt-56">
+        <div className="anim-up mx-auto mb-10 max-w-xl text-center">
+          <span
+            className="text-[10px] tracking-[0.18em] text-white/30"
+            style={{ fontFamily: "var(--font-mono)" }}
+          >
+            TUDO QUE UM IMPORTADOR PRECISA
+          </span>
+          <h2 className="mt-3 text-[26px] font-semibold leading-tight text-white/85" style={{ letterSpacing: "-0.02em" }}>
+            Sem planilha solta, sem sistema separado pra cada área.
+          </h2>
+          <p className="mt-2 text-[13px] leading-relaxed text-white/35">
+            O AG Imports substitui as ferramentas soltas do dia a dia por um único lugar,
+            do controle de estoque à decisão de preço, do primeiro contato com o cliente
+            ao fechamento do caixa do mês.
+          </p>
+        </div>
         <div className="grid grid-cols-2 gap-px overflow-hidden rounded-xl ring-1 ring-white/[0.08] sm:grid-cols-4">
           {MODULOS.map(([t, d]) => (
             <div key={t} className="bg-white/[0.03] p-4 text-left backdrop-blur-sm">

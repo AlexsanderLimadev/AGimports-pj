@@ -77,13 +77,13 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "AG Imports — ERP & Business Suite" },
+      { title: "AG Imports · ERP & Business Suite" },
       {
         name: "description",
         content:
           "Plataforma completa de gestão da AG Imports: vendas, estoque, financeiro, marketing, CRM, BI e funis de venda em tempo real.",
       },
-      { property: "og:title", content: "AG Imports — ERP & Business Suite" },
+      { property: "og:title", content: "AG Imports · ERP & Business Suite" },
       {
         property: "og:description",
         content:

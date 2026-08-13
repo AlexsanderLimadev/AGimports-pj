@@ -194,7 +194,7 @@ function ProdutosPage() {
                         )}
                       </td>
                       <td className="px-4 py-2.5 text-xs">
-                        {(p as any).categories?.name ?? "—"}
+                        {(p as any).categories?.name ?? "-"}
                       </td>
                       <td
                         className={`px-4 py-2.5 tabular text-right ${low ? "text-destructive" : ""}`}

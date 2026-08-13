@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { PageHeader, SectionCard } from "@/components/ui-bits";
-import { Shield, KeyRound, Users, ScrollText, Lock } from "lucide-react";
+import { Shield, Users, ScrollText, Lock } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 
 export const Route = createFileRoute("/_authenticated/app/configuracoes")({
@@ -27,7 +27,6 @@ function Conf() {
           <div className="space-y-3 text-sm">
             {[
               [<Shield className="h-4 w-4 text-primary" />, "MFA obrigatório", "App autenticador + email", true],
-              [<KeyRound className="h-4 w-4 text-primary" />, "Rotação de senhas", "A cada 90 dias", true],
               [<Lock className="h-4 w-4 text-primary" />, "Criptografia AES-256", "Dados sensíveis em repouso", true],
               [<ScrollText className="h-4 w-4 text-primary" />, "Logs de auditoria", "Todas as ações registradas", true],
             ].map(([icon, title, desc, on], i) => (

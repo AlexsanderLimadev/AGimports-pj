@@ -83,7 +83,10 @@ export const createFunil = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     await enforceRateLimit(context.supabase, context.userId, "createFunil", 30);
-    const slug = slugify(data.nome);
+    // Sufixo curto garante que criar o mesmo template (ou o mesmo nome de
+    // funil) mais de uma vez nunca esbarra na trava de "nome único por
+    // usuário" do banco — antes disso travava com um erro técnico feio.
+    const slug = `${slugify(data.nome)}-${Math.random().toString(36).slice(2, 7)}`;
     const { data: funil, error } = await context.supabase
       .from("funis")
       .insert({ user_id: context.userId, nome: data.nome, slug })

@@ -269,8 +269,8 @@ function Clientes() {
                         <div className="font-medium">{c.nome}</div>
                         {c.email && <div className="text-xs text-muted-foreground">{c.email}</div>}
                       </td>
-                      <td className="px-4 py-2.5 text-xs">{c.telefone ?? "—"}</td>
-                      <td className="px-4 py-2.5 text-xs">{c.documento ?? "—"}</td>
+                      <td className="px-4 py-2.5 text-xs">{c.telefone ?? "-"}</td>
+                      <td className="px-4 py-2.5 text-xs">{c.documento ?? "-"}</td>
                       <td className="px-4 py-2.5 text-xs text-muted-foreground">
                         {new Date(c.created_at).toLocaleDateString("pt-BR")}
                       </td>

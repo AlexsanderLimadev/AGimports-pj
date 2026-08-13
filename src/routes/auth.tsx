@@ -6,7 +6,10 @@ import { z } from "zod";
 import { ArrowRight, Loader2 } from "lucide-react";
 import { AGLogoFull, Grain, Grid, useMouseRel } from "@/components/brand-fx";
 
-const searchSchema = z.object({ redirect: z.string().optional() });
+const searchSchema = z.object({
+  redirect: z.string().optional(),
+  mode: z.enum(["signin", "signup", "forgot"]).optional(),
+});
 
 export const Route = createFileRoute("/auth")({
   head: () => ({ meta: [{ title: "Entrar · AG Imports" }] }),
@@ -22,9 +25,9 @@ const BG_URL =
   "https://images.unsplash.com/photo-1671159593357-ee577a598f71?w=1920&h=1080&fit=crop&auto=format&q=80";
 
 function AuthPage() {
-  const { redirect: redirectTo } = useSearch({ from: "/auth" });
+  const { redirect: redirectTo, mode: modeParam } = useSearch({ from: "/auth" });
   const navigate = useNavigate();
-  const [mode, setMode] = useState<Mode>("signin");
+  const [mode, setMode] = useState<Mode>(modeParam ?? "signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");

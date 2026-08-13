@@ -49,7 +49,7 @@ function Dashboard() {
           value={
             data.potentialRevenueCents > 0
               ? `${((data.potentialProfitCents / data.potentialRevenueCents) * 100).toFixed(1)}%`
-              : "—"
+              : "-"
           }
         />
       </div>
