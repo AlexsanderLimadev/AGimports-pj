@@ -269,8 +269,8 @@ function Landing() {
               {accounts.map((acc) => (
                 <DropdownMenuItem
                   key={acc.id}
-                  disabled
-                  className="flex items-center justify-between text-white/50 opacity-70"
+                  onClick={() => toast.message("Essa já é sua conta atual")}
+                  className="flex cursor-pointer items-center justify-between text-white/50 focus:bg-white/[0.08] focus:text-white/70"
                 >
                   <span className="flex items-center gap-2">
                     <Users size={14} className="text-white/30" /> {acc.label}
@@ -279,7 +279,14 @@ function Landing() {
                 </DropdownMenuItem>
               ))}
               {accounts.length < 3 && (
-                <DropdownMenuItem disabled className="flex items-center gap-2 text-white/30">
+                <DropdownMenuItem
+                  onClick={() =>
+                    toast.message("Múltiplas empresas ainda não está disponível", {
+                      description: "Essa função está em desenvolvimento e chega em breve.",
+                    })
+                  }
+                  className="flex cursor-pointer items-center gap-2 text-white/40 focus:bg-white/[0.08] focus:text-white/60"
+                >
                   <Plus size={14} /> Adicionar outra empresa (em breve)
                 </DropdownMenuItem>
               )}

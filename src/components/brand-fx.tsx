@@ -5,11 +5,24 @@ import logoFull from "@/assets/ag-imports-logo-full.png";
 /** Posição relativa do mouse (0..1) dentro de um elemento. */
 export function useMouseRel(ref: RefObject<HTMLElement | null>) {
   const [pos, setPos] = useState({ x: 0.5, y: 0.5 });
+  const rafRef = useRef<number | null>(null);
+  const lastEventRef = useRef<{ x: number; y: number } | null>(null);
+
   const cb = useCallback(
     (e: MouseEvent) => {
       if (!ref.current) return;
       const r = ref.current.getBoundingClientRect();
-      setPos({ x: (e.clientX - r.left) / r.width, y: (e.clientY - r.top) / r.height });
+      lastEventRef.current = { x: (e.clientX - r.left) / r.width, y: (e.clientY - r.top) / r.height };
+      // O navegador pode disparar mousemove centenas de vezes por segundo —
+      // sem isso, o React tentaria re-renderizar a página inteira a cada
+      // pixel percorrido pelo cursor, o que trava a rolagem/interação.
+      // Aqui só aplicamos a posição mais recente uma vez por frame de tela.
+      if (rafRef.current == null) {
+        rafRef.current = requestAnimationFrame(() => {
+          if (lastEventRef.current) setPos(lastEventRef.current);
+          rafRef.current = null;
+        });
+      }
     },
     [ref],
   );
@@ -17,7 +30,10 @@ export function useMouseRel(ref: RefObject<HTMLElement | null>) {
     const el = ref.current;
     if (!el) return;
     el.addEventListener("mousemove", cb);
-    return () => el.removeEventListener("mousemove", cb);
+    return () => {
+      el.removeEventListener("mousemove", cb);
+      if (rafRef.current != null) cancelAnimationFrame(rafRef.current);
+    };
   }, [cb, ref]);
   return pos;
 }

@@ -5,7 +5,7 @@ import { PageHeader, SectionCard } from "@/components/ui-bits";
 import { brl } from "@/lib/mock/data";
 import { ArrowLeft, Pencil, Plus, Trash2 } from "lucide-react";
 import {
-  Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger,
+  Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";

@@ -42,10 +42,17 @@ function AuthPage() {
   const btnRef = useRef<HTMLButtonElement>(null);
   const [mag, setMag] = useState({ x: 0, y: 0 });
   const [magOn, setMagOn] = useState(false);
+  const magRafRef = useRef<number | null>(null);
   const onMag = (e: React.MouseEvent<HTMLButtonElement>) => {
     if (!btnRef.current) return;
     const r = btnRef.current.getBoundingClientRect();
-    setMag({ x: (e.clientX - (r.left + r.width / 2)) * 0.22, y: (e.clientY - (r.top + r.height / 2)) * 0.22 });
+    const next = { x: (e.clientX - (r.left + r.width / 2)) * 0.22, y: (e.clientY - (r.top + r.height / 2)) * 0.22 };
+    if (magRafRef.current == null) {
+      magRafRef.current = requestAnimationFrame(() => {
+        setMag(next);
+        magRafRef.current = null;
+      });
+    }
   };
 
   useEffect(() => {
