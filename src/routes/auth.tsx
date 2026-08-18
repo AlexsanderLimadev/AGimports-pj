@@ -1,10 +1,12 @@
 import { createFileRoute, useNavigate, useSearch } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { z } from "zod";
 import { ArrowRight, Loader2 } from "lucide-react";
 import { AGLogoFull, Grain, Grid, useMouseRel } from "@/components/brand-fx";
+import { logAccess } from "@/lib/access-log.functions";
 
 const searchSchema = z.object({
   redirect: z.string().optional(),
@@ -27,6 +29,7 @@ const BG_URL =
 function AuthPage() {
   const { redirect: redirectTo, mode: modeParam } = useSearch({ from: "/auth" });
   const navigate = useNavigate();
+  const logAccessFn = useServerFn(logAccess);
   const [mode, setMode] = useState<Mode>(modeParam ?? "signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -69,6 +72,7 @@ function AuthPage() {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
         toast.success("Bem-vindo de volta!");
+        logAccessFn({ data: { event: "sign_in", userAgent: navigator.userAgent } }).catch(() => {});
         navigate({ to: redirectTo ?? "/app", replace: true });
       } else if (mode === "signup") {
         const { error } = await supabase.auth.signUp({
@@ -81,6 +85,7 @@ function AuthPage() {
         });
         if (error) throw error;
         toast.success("Conta criada com sucesso!");
+        logAccessFn({ data: { event: "sign_up", userAgent: navigator.userAgent } }).catch(() => {});
         navigate({ to: redirectTo ?? "/app", replace: true });
       } else {
         const { error } = await supabase.auth.resetPasswordForEmail(email, {

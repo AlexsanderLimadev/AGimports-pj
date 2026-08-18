@@ -9,6 +9,7 @@ import {
 } from "@tanstack/react-router";
 import { useEffect, type ReactNode } from "react";
 import { Toaster } from "@/components/ui/sonner";
+import { CookieConsent } from "@/components/cookie-consent";
 import { supabase } from "@/integrations/supabase/client";
 
 import appCss from "../styles.css?url";
@@ -90,7 +91,11 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
           "ERP premium para varejo e atacado de importados. Dashboards, calculadora de precificação, funis, BI e automações.",
       },
       { property: "og:type", content: "website" },
+      { property: "og:image", content: "/og-image.png" },
+      { property: "og:image:width", content: "1200" },
+      { property: "og:image:height", content: "630" },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:image", content: "/og-image.png" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
@@ -111,12 +116,23 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 const THEME_INIT_SCRIPT = `(function(){try{var m=document.cookie.match(/(?:^|;\\s*)ag-theme=(light|dark)/);var t=(m&&m[1])||localStorage.getItem('ag-theme')||'dark';if(t==='dark'){document.documentElement.classList.add('dark');}document.documentElement.style.colorScheme=t;}catch(e){document.documentElement.classList.add('dark');}})();`;
 
+const SCHEMA_ORG = JSON.stringify({
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  name: "AG Imports",
+  applicationCategory: "BusinessApplication",
+  operatingSystem: "Web",
+  description:
+    "Sistema de gestão (ERP) para importadores: estoque, pedidos, financeiro, CRM, marketing e BI em tempo real.",
+});
+
 function RootShell({ children }: { children: ReactNode }) {
   return (
     <html lang="pt-BR">
       <head>
         <HeadContent />
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: SCHEMA_ORG }} />
       </head>
       <body className="bg-background text-foreground">
         {children}
@@ -143,6 +159,7 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       <Outlet />
       <Toaster richColors position="top-right" />
+      <CookieConsent />
     </QueryClientProvider>
   );
 }

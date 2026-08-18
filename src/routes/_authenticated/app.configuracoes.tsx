@@ -1,7 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
 import { PageHeader, SectionCard } from "@/components/ui-bits";
 import { Shield, Users, ScrollText, Lock } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
+import { listAccessLogs } from "@/lib/access-log.functions";
 
 export const Route = createFileRoute("/_authenticated/app/configuracoes")({
   head: () => ({ meta: [{ title: "Configurações · AG Imports" }] }),
@@ -17,7 +20,21 @@ const perfis = [
   { nome: "Atendimento", membros: 3, cor: "text-warning" },
 ];
 
+const EVENT_LABEL: Record<string, string> = {
+  sign_in: "Login",
+  sign_out: "Logout",
+  sign_up: "Conta criada",
+  password_reset: "Recuperação de senha",
+};
+
 function Conf() {
+  const listLogsFn = useServerFn(listAccessLogs);
+  const [logs, setLogs] = useState<{ id: number; event: string; user_agent: string | null; created_at: string }[]>([]);
+
+  useEffect(() => {
+    listLogsFn().then(setLogs).catch(() => {});
+  }, [listLogsFn]);
+
   return (
     <>
       <PageHeader title="Configurações" description="Segurança, equipe e conformidade" />
@@ -58,6 +75,23 @@ function Conf() {
           </div>
         </SectionCard>
       </div>
+
+      <SectionCard title="Log de acesso" description="Seus últimos acessos à plataforma" className="mt-4">
+        {logs.length === 0 ? (
+          <p className="text-xs text-muted-foreground">Nenhum acesso registrado ainda.</p>
+        ) : (
+          <div className="space-y-1.5">
+            {logs.map((l) => (
+              <div key={l.id} className="flex items-center justify-between rounded-md border border-border/60 bg-background px-3 py-2 text-xs">
+                <span className="font-medium">{EVENT_LABEL[l.event] ?? l.event}</span>
+                <span className="text-muted-foreground">
+                  {new Date(l.created_at).toLocaleString("pt-BR")}
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
+      </SectionCard>
 
       <SectionCard title="Conformidade" description="LGPD e boas práticas" className="mt-4">
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 text-xs">

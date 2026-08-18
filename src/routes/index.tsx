@@ -20,6 +20,22 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 export const Route = createFileRoute("/")({
+  head: () => ({
+    meta: [
+      { title: "AG Imports · ERP para importadores de moda e acessórios" },
+      {
+        name: "description",
+        content:
+          "Sistema completo de gestão para importadores: controle de estoque, pedidos, financeiro, CRM e funis de venda em um só lugar, com indicadores em tempo real.",
+      },
+      { property: "og:title", content: "AG Imports · ERP para importadores de moda e acessórios" },
+      {
+        property: "og:description",
+        content:
+          "Sistema completo de gestão para importadores: estoque, pedidos, financeiro, CRM e BI em tempo real.",
+      },
+    ],
+  }),
   component: Landing,
 });
 
@@ -412,6 +428,72 @@ function Landing() {
             </div>
           ))}
         </div>
+      </div>
+
+      <FaqSection />
+
+      {/* CTA fixo no rodapé, só em telas pequenas — some quando o menu
+          mobile está aberto, pra não empilhar dois botões na tela. */}
+      {!mobileOpen && (
+        <div className="fixed inset-x-0 bottom-0 z-30 border-t border-white/10 bg-black/80 p-3 backdrop-blur-lg sm:hidden">
+          <Link
+            to={cta}
+            className="flex w-full items-center justify-center gap-1.5 rounded-full bg-white py-3 text-[13px] font-medium text-black"
+          >
+            {signedIn ? "Acessar painel" : "Criar conta grátis"} <ArrowRight size={13} />
+          </Link>
+        </div>
+      )}
+    </div>
+  );
+}
+
+const FAQ_ITEMS: [string, string][] = [
+  [
+    "Preciso instalar algo pra usar o AG Imports?",
+    "Não. É 100% web — você acessa pelo navegador, de qualquer computador ou celular, sem instalar nada.",
+  ],
+  [
+    "Meus dados ficam seguros?",
+    "Sim. Cada conta só enxerga os próprios dados (proteção aplicada diretamente no banco, não só na tela), e você pode exportar ou excluir seus dados a qualquer momento.",
+  ],
+  [
+    "Dá pra importar meu estoque que já existe em planilha?",
+    "O cadastro de produtos é feito direto na plataforma. Se você já tem uma planilha, a equipe pode te orientar no processo de migração inicial.",
+  ],
+  [
+    "O sistema serve pra varejo, atacado, ou os dois?",
+    "Os dois. Dá pra segmentar clientes e pedidos por canal (varejo, atacado, marketplace) e acompanhar cada um separadamente nos relatórios.",
+  ],
+  [
+    "Preciso de internet pra usar?",
+    "Sim, é um sistema online — funciona em qualquer lugar com conexão, e os dados ficam sempre atualizados em tempo real entre dispositivos.",
+  ],
+];
+
+function FaqSection() {
+  const [open, setOpen] = useState<number | null>(null);
+  return (
+    <div className="relative z-10 mx-auto w-full max-w-2xl px-5 pb-28 sm:pb-24">
+      <h2 className="text-center text-[22px] font-semibold text-white/85" style={{ letterSpacing: "-0.02em" }}>
+        Perguntas frequentes
+      </h2>
+      <div className="mt-6 divide-y divide-white/[0.08] rounded-xl border border-white/[0.08]">
+        {FAQ_ITEMS.map(([q, a], i) => (
+          <div key={q}>
+            <button
+              onClick={() => setOpen(open === i ? null : i)}
+              aria-expanded={open === i}
+              className="flex w-full items-center justify-between gap-3 px-4 py-3.5 text-left text-[13px] text-white/75 hover:text-white"
+            >
+              {q}
+              <span className={`shrink-0 text-white/30 transition-transform ${open === i ? "rotate-45" : ""}`}>
+                <Plus size={16} />
+              </span>
+            </button>
+            {open === i && <p className="px-4 pb-4 text-[12px] leading-relaxed text-white/40">{a}</p>}
+          </div>
+        ))}
       </div>
     </div>
   );

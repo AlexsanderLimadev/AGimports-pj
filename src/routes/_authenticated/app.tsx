@@ -1,4 +1,4 @@
-import { createFileRoute, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
+import { createFileRoute, Link, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
 import { Bell, LogOut, Search, PackageX, Wallet, PartyPopper } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
@@ -7,9 +7,10 @@ import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/s
 import { AppSidebar } from "@/components/app-sidebar";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { supabase } from "@/integrations/supabase/client";
-import { resolveSearch } from "@/lib/search-routes";
+import { resolveSearch, APP_SEARCH_ROUTES } from "@/lib/search-routes";
 import { dashboardStats } from "@/lib/products.functions";
 import { listLancamentos } from "@/lib/financeiro.functions";
+import { logAccess } from "@/lib/access-log.functions";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -31,6 +32,7 @@ function AppLayout() {
   const [appSearch, setAppSearch] = useState("");
   const statsFn = useServerFn(dashboardStats);
   const lancamentosFn = useServerFn(listLancamentos);
+  const logAccessFn = useServerFn(logAccess);
   const [alerts, setAlerts] = useState<{ lowStock: number; vencidos: number }>({ lowStock: 0, vencidos: 0 });
 
   useEffect(() => {
@@ -74,6 +76,7 @@ function AppLayout() {
   }
 
   async function signOut() {
+    await logAccessFn({ data: { event: "sign_out", userAgent: navigator.userAgent } }).catch(() => {});
     await supabase.auth.signOut();
     navigate({ to: "/auth", replace: true });
   }
@@ -150,6 +153,7 @@ function AppLayout() {
             </div>
           </header>
           <main className="min-w-0 flex-1 p-4 sm:p-6 lg:p-8">
+            <Breadcrumb pathname={pathname} />
             <div key={pathname} className="fade-in-up">
               <Outlet />
             </div>
@@ -157,5 +161,21 @@ function AppLayout() {
         </SidebarInset>
       </div>
     </SidebarProvider>
+  );
+}
+
+function Breadcrumb({ pathname }: { pathname: string }) {
+  const isRoot = pathname === "/app";
+  const current = APP_SEARCH_ROUTES.find((r) => r.path === pathname);
+  return (
+    <nav aria-label="Trilha de navegação" className="mb-3 flex items-center gap-1.5 text-xs text-muted-foreground">
+      <Link to="/app" className="hover:text-foreground">Dashboard</Link>
+      {!isRoot && (
+        <>
+          <span>/</span>
+          <span className="text-foreground">{current?.label ?? "Página"}</span>
+        </>
+      )}
+    </nav>
   );
 }
