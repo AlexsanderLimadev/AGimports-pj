@@ -9,6 +9,7 @@ export const APP_SEARCH_ROUTES: SearchRoute[] = [
   { path: "/app", label: "Dashboard", keywords: ["dashboard", "painel", "inicio", "home", "resumo", "visao geral"] },
   { path: "/app/produtos", label: "Produtos", keywords: ["produto", "produtos", "catalogo", "sku", "item", "itens"] },
   { path: "/app/estoque", label: "Estoque", keywords: ["estoque", "inventario", "movimentacao", "movimentacoes"] },
+  { path: "/app/fornecedores", label: "Fornecedores", keywords: ["fornecedor", "fornecedores", "supplier", "compra", "compras"] },
   { path: "/app/pedidos", label: "Pedidos", keywords: ["pedido", "pedidos", "venda", "vendas", "kanban", "encomenda"] },
   { path: "/app/funis", label: "Funis de venda", keywords: ["funil", "funis", "funil de venda", "funis de venda"] },
   { path: "/app/calculadora", label: "Calculadora", keywords: ["calculadora", "preco", "precificacao", "margem", "simulacao", "simulador"] },

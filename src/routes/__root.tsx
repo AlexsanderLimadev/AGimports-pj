@@ -126,6 +126,17 @@ const SCHEMA_ORG = JSON.stringify({
     "Sistema de gestão (ERP) para importadores: estoque, pedidos, financeiro, CRM, marketing e BI em tempo real.",
 });
 
+// Google Analytics — só carrega se você configurar VITE_GA_ID no .env.
+// Sem essa variável, nada é adicionado à página (nenhum script de
+// terceiro roda sem você decidir ligar). Pra ativar:
+//   1. Cria uma propriedade em https://analytics.google.com
+//   2. Copia o ID (formato "G-XXXXXXXXXX")
+//   3. Adiciona no .env: VITE_GA_ID="G-XXXXXXXXXX"
+const GA_ID = import.meta.env.VITE_GA_ID as string | undefined;
+const GA_SCRIPT = GA_ID
+  ? `window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','${GA_ID}');`
+  : null;
+
 function RootShell({ children }: { children: ReactNode }) {
   return (
     <html lang="pt-BR">
@@ -133,6 +144,12 @@ function RootShell({ children }: { children: ReactNode }) {
         <HeadContent />
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: SCHEMA_ORG }} />
+        {GA_ID && (
+          <>
+            <script async src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`} />
+            <script dangerouslySetInnerHTML={{ __html: GA_SCRIPT! }} />
+          </>
+        )}
       </head>
       <body className="bg-background text-foreground">
         {children}

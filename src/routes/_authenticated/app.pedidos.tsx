@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
-import { useServerFn } from "@tanstack/react-start";
+import { queryOptions, useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
+import { useState } from "react";
 import { PageHeader, StatusPill } from "@/components/ui-bits";
 import { brl } from "@/lib/mock/data";
 import { Plus, Trash2 } from "lucide-react";
@@ -30,11 +30,6 @@ import {
   updatePedidoStatus,
 } from "@/lib/pedidos.functions";
 
-export const Route = createFileRoute("/_authenticated/app/pedidos")({
-  head: () => ({ meta: [{ title: "Pedidos · AG Imports" }] }),
-  component: Pedidos,
-});
-
 const STATUS = ["novo", "separacao", "expedicao", "entregue", "cancelado"] as const;
 const STATUS_LABEL: Record<(typeof STATUS)[number], string> = {
   novo: "Novo",
@@ -48,24 +43,22 @@ const CANAIS = ["site", "whatsapp", "marketplace", "loja", "outro"] as const;
 type Status = (typeof STATUS)[number];
 type Canal = (typeof CANAIS)[number];
 
-type Pedido = {
-  id: string;
-  numero: number;
-  cliente_nome_snapshot: string | null;
-  status: Status;
-  canal: Canal;
-  total_cents: number;
-  created_at: string;
-  clientes: { nome: string } | null;
-};
+const pedidosOptions = queryOptions({
+  queryKey: ["pedidos"],
+  queryFn: () => listPedidos(),
+});
+
+export const Route = createFileRoute("/_authenticated/app/pedidos")({
+  head: () => ({ meta: [{ title: "Pedidos · AG Imports" }] }),
+  loader: ({ context }) => context.queryClient.ensureQueryData(pedidosOptions),
+  component: Pedidos,
+});
 
 function Pedidos() {
-  const list = useServerFn(listPedidos);
-  const create = useServerFn(createPedido);
-  const setStatus = useServerFn(updatePedidoStatus);
-  const remove = useServerFn(deletePedido);
+  const { data: rows } = useSuspenseQuery(pedidosOptions);
+  const qc = useQueryClient();
+  const invalidate = () => qc.invalidateQueries({ queryKey: ["pedidos"] });
 
-  const [rows, setRows] = useState<Pedido[]>([]);
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({
     cliente: "",
@@ -76,17 +69,9 @@ function Pedidos() {
     status: "novo" as Status,
   });
 
-  async function reload() {
-    try { setRows((await list()) as Pedido[]); }
-    catch (e) { toast.error((e as Error).message); }
-  }
-  useEffect(() => { reload(); }, []);
-
-  async function submit() {
-    if (!form.cliente.trim()) return toast.error("Informe o cliente");
-    if (!form.descricao.trim()) return toast.error("Informe a descrição do item");
-    try {
-      await create({
+  const create = useMutation({
+    mutationFn: () =>
+      createPedido({
         data: {
           cliente_nome_snapshot: form.cliente.trim(),
           status: form.status,
@@ -99,23 +84,47 @@ function Pedidos() {
             },
           ],
         },
-      });
+      }),
+    onSuccess: () => {
       toast.success("Pedido criado");
       setOpen(false);
       setForm({ cliente: "", descricao: "", qty: 1, unit: 0, canal: "site", status: "novo" });
-      reload();
-    } catch (e) { toast.error((e as Error).message); }
-  }
+      invalidate();
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
 
-  async function move(id: string, status: Status) {
-    setRows((prev) => prev.map((p) => (p.id === id ? { ...p, status } : p)));
-    try { await setStatus({ data: { id, status } }); }
-    catch (e) { toast.error((e as Error).message); reload(); }
-  }
+  const move = useMutation({
+    mutationFn: ({ id, status }: { id: string; status: Status }) =>
+      updatePedidoStatus({ data: { id, status } }),
+    onMutate: async ({ id, status }) => {
+      await qc.cancelQueries({ queryKey: ["pedidos"] });
+      const previous = qc.getQueryData(pedidosOptions.queryKey);
+      qc.setQueryData(pedidosOptions.queryKey, (old) =>
+        old ? old.map((p) => (p.id === id ? { ...p, status } : p)) : old,
+      );
+      return { previous };
+    },
+    onError: (e: Error, _vars, ctx) => {
+      toast.error(e.message);
+      if (ctx?.previous) qc.setQueryData(pedidosOptions.queryKey, ctx.previous);
+    },
+    onSettled: invalidate,
+  });
 
-  async function del(id: string) {
-    try { await remove({ data: { id } }); toast.success("Removido"); reload(); }
-    catch (e) { toast.error((e as Error).message); }
+  const del = useMutation({
+    mutationFn: (id: string) => deletePedido({ data: { id } }),
+    onSuccess: () => {
+      toast.success("Removido");
+      invalidate();
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  function submit() {
+    if (!form.cliente.trim()) return toast.error("Informe o cliente");
+    if (!form.descricao.trim()) return toast.error("Informe a descrição do item");
+    create.mutate();
   }
 
   return (
@@ -162,7 +171,7 @@ function Pedidos() {
               </div>
               <DialogFooter>
                 <Button variant="outline" onClick={() => setOpen(false)}>Cancelar</Button>
-                <Button onClick={submit}>Criar pedido</Button>
+                <Button onClick={submit} disabled={create.isPending}>Criar pedido</Button>
               </DialogFooter>
             </DialogContent>
           </Dialog>
@@ -184,7 +193,7 @@ function Pedidos() {
               </div>
               <div className="space-y-2 p-2">
                 {items.map((p) => {
-                  const nome = p.clientes?.nome ?? p.cliente_nome_snapshot ?? "Sem cliente";
+                  const nome = (p as any).clientes?.nome ?? p.cliente_nome_snapshot ?? "Sem cliente";
                   return (
                     <div key={p.id} className="group rounded-lg border border-border bg-background p-2.5 hover:border-primary/40">
                       <div className="flex items-center justify-between text-xs">
@@ -197,11 +206,11 @@ function Pedidos() {
                         <span className="tabular text-xs font-semibold text-primary">{brl(p.total_cents / 100)}</span>
                       </div>
                       <div className="mt-2 flex items-center gap-1.5">
-                        <Select value={p.status} onValueChange={(v) => move(p.id, v as Status)}>
+                        <Select value={p.status} onValueChange={(v) => move.mutate({ id: p.id, status: v as Status })}>
                           <SelectTrigger className="h-7 flex-1 text-[11px]"><SelectValue /></SelectTrigger>
                           <SelectContent>{STATUS.map((s) => <SelectItem key={s} value={s}>{STATUS_LABEL[s]}</SelectItem>)}</SelectContent>
                         </Select>
-                        <button onClick={() => del(p.id)} className="grid h-7 w-7 place-items-center rounded-md border border-border text-muted-foreground opacity-0 transition hover:border-destructive/60 hover:text-destructive group-hover:opacity-100" aria-label="Remover">
+                        <button onClick={() => del.mutate(p.id)} className="grid h-7 w-7 place-items-center rounded-md border border-border text-muted-foreground opacity-0 transition hover:border-destructive/60 hover:text-destructive group-hover:opacity-100" aria-label="Remover">
                           <Trash2 className="h-3.5 w-3.5" />
                         </button>
                       </div>

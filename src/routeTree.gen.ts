@@ -25,6 +25,7 @@ import { Route as AuthenticatedAppClientesRouteImport } from './routes/_authenti
 import { Route as AuthenticatedAppConfiguracoesRouteImport } from './routes/_authenticated/app.configuracoes'
 import { Route as AuthenticatedAppEstoqueRouteImport } from './routes/_authenticated/app.estoque'
 import { Route as AuthenticatedAppFinanceiroRouteImport } from './routes/_authenticated/app.financeiro'
+import { Route as AuthenticatedAppFornecedoresRouteImport } from './routes/_authenticated/app.fornecedores'
 import { Route as AuthenticatedAppMarketingRouteImport } from './routes/_authenticated/app.marketing'
 import { Route as AuthenticatedAppMetasRouteImport } from './routes/_authenticated/app.metas'
 import { Route as AuthenticatedAppPedidosRouteImport } from './routes/_authenticated/app.pedidos'
@@ -117,6 +118,12 @@ const AuthenticatedAppFinanceiroRoute =
     path: '/financeiro',
     getParentRoute: () => AuthenticatedAppRoute,
   } as any)
+const AuthenticatedAppFornecedoresRoute =
+  AuthenticatedAppFornecedoresRouteImport.update({
+    id: '/fornecedores',
+    path: '/fornecedores',
+    getParentRoute: () => AuthenticatedAppRoute,
+  } as any)
 const AuthenticatedAppMarketingRoute =
   AuthenticatedAppMarketingRouteImport.update({
     id: '/marketing',
@@ -172,6 +179,7 @@ export interface FileRoutesByFullPath {
   '/app/configuracoes': typeof AuthenticatedAppConfiguracoesRoute
   '/app/estoque': typeof AuthenticatedAppEstoqueRoute
   '/app/financeiro': typeof AuthenticatedAppFinanceiroRoute
+  '/app/fornecedores': typeof AuthenticatedAppFornecedoresRoute
   '/app/marketing': typeof AuthenticatedAppMarketingRoute
   '/app/metas': typeof AuthenticatedAppMetasRoute
   '/app/pedidos': typeof AuthenticatedAppPedidosRoute
@@ -195,6 +203,7 @@ export interface FileRoutesByTo {
   '/app/configuracoes': typeof AuthenticatedAppConfiguracoesRoute
   '/app/estoque': typeof AuthenticatedAppEstoqueRoute
   '/app/financeiro': typeof AuthenticatedAppFinanceiroRoute
+  '/app/fornecedores': typeof AuthenticatedAppFornecedoresRoute
   '/app/marketing': typeof AuthenticatedAppMarketingRoute
   '/app/metas': typeof AuthenticatedAppMetasRoute
   '/app/pedidos': typeof AuthenticatedAppPedidosRoute
@@ -221,6 +230,7 @@ export interface FileRoutesById {
   '/_authenticated/app/configuracoes': typeof AuthenticatedAppConfiguracoesRoute
   '/_authenticated/app/estoque': typeof AuthenticatedAppEstoqueRoute
   '/_authenticated/app/financeiro': typeof AuthenticatedAppFinanceiroRoute
+  '/_authenticated/app/fornecedores': typeof AuthenticatedAppFornecedoresRoute
   '/_authenticated/app/marketing': typeof AuthenticatedAppMarketingRoute
   '/_authenticated/app/metas': typeof AuthenticatedAppMetasRoute
   '/_authenticated/app/pedidos': typeof AuthenticatedAppPedidosRoute
@@ -247,6 +257,7 @@ export interface FileRouteTypes {
     | '/app/configuracoes'
     | '/app/estoque'
     | '/app/financeiro'
+    | '/app/fornecedores'
     | '/app/marketing'
     | '/app/metas'
     | '/app/pedidos'
@@ -270,6 +281,7 @@ export interface FileRouteTypes {
     | '/app/configuracoes'
     | '/app/estoque'
     | '/app/financeiro'
+    | '/app/fornecedores'
     | '/app/marketing'
     | '/app/metas'
     | '/app/pedidos'
@@ -295,6 +307,7 @@ export interface FileRouteTypes {
     | '/_authenticated/app/configuracoes'
     | '/_authenticated/app/estoque'
     | '/_authenticated/app/financeiro'
+    | '/_authenticated/app/fornecedores'
     | '/_authenticated/app/marketing'
     | '/_authenticated/app/metas'
     | '/_authenticated/app/pedidos'
@@ -428,6 +441,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppFinanceiroRouteImport
       parentRoute: typeof AuthenticatedAppRoute
     }
+    '/_authenticated/app/fornecedores': {
+      id: '/_authenticated/app/fornecedores'
+      path: '/fornecedores'
+      fullPath: '/app/fornecedores'
+      preLoaderRoute: typeof AuthenticatedAppFornecedoresRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
     '/_authenticated/app/marketing': {
       id: '/_authenticated/app/marketing'
       path: '/marketing'
@@ -489,6 +509,7 @@ interface AuthenticatedAppRouteChildren {
   AuthenticatedAppConfiguracoesRoute: typeof AuthenticatedAppConfiguracoesRoute
   AuthenticatedAppEstoqueRoute: typeof AuthenticatedAppEstoqueRoute
   AuthenticatedAppFinanceiroRoute: typeof AuthenticatedAppFinanceiroRoute
+  AuthenticatedAppFornecedoresRoute: typeof AuthenticatedAppFornecedoresRoute
   AuthenticatedAppMarketingRoute: typeof AuthenticatedAppMarketingRoute
   AuthenticatedAppMetasRoute: typeof AuthenticatedAppMetasRoute
   AuthenticatedAppPedidosRoute: typeof AuthenticatedAppPedidosRoute
@@ -508,6 +529,7 @@ const AuthenticatedAppRouteChildren: AuthenticatedAppRouteChildren = {
   AuthenticatedAppConfiguracoesRoute: AuthenticatedAppConfiguracoesRoute,
   AuthenticatedAppEstoqueRoute: AuthenticatedAppEstoqueRoute,
   AuthenticatedAppFinanceiroRoute: AuthenticatedAppFinanceiroRoute,
+  AuthenticatedAppFornecedoresRoute: AuthenticatedAppFornecedoresRoute,
   AuthenticatedAppMarketingRoute: AuthenticatedAppMarketingRoute,
   AuthenticatedAppMetasRoute: AuthenticatedAppMetasRoute,
   AuthenticatedAppPedidosRoute: AuthenticatedAppPedidosRoute,

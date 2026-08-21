@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
-import { useServerFn } from "@tanstack/react-start";
+import { queryOptions, useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
+import { useState } from "react";
 import { KpiCard, PageHeader, SectionCard, StatusPill } from "@/components/ui-bits";
 import { Button } from "@/components/ui/button";
 import {
@@ -29,11 +29,6 @@ import {
   listLancamentos,
 } from "@/lib/financeiro.functions";
 
-export const Route = createFileRoute("/_authenticated/app/financeiro")({
-  head: () => ({ meta: [{ title: "Financeiro · AG Imports" }] }),
-  component: Financeiro,
-});
-
 type Lancamento = {
   id: string;
   tipo: "receita" | "despesa";
@@ -51,11 +46,22 @@ const STATUS_LABEL: Record<string, string> = {
   cancelado: "Cancelado",
 };
 
+const lancamentosOptions = queryOptions({
+  queryKey: ["lancamentos"],
+  queryFn: () => listLancamentos() as Promise<Lancamento[]>,
+});
+
+export const Route = createFileRoute("/_authenticated/app/financeiro")({
+  head: () => ({ meta: [{ title: "Financeiro · AG Imports" }] }),
+  loader: ({ context }) => context.queryClient.ensureQueryData(lancamentosOptions),
+  component: Financeiro,
+});
+
 function Financeiro() {
-  const list = useServerFn(listLancamentos);
-  const create = useServerFn(createLancamento);
-  const remove = useServerFn(deleteLancamento);
-  const [rows, setRows] = useState<Lancamento[]>([]);
+  const { data: rows } = useSuspenseQuery(lancamentosOptions);
+  const qc = useQueryClient();
+  const invalidate = () => qc.invalidateQueries({ queryKey: ["lancamentos"] });
+
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({
     tipo: "receita" as "receita" | "despesa",
@@ -66,22 +72,9 @@ function Financeiro() {
     categoria: "",
   });
 
-  async function reload() {
-    try {
-      setRows((await list()) as Lancamento[]);
-    } catch (e) { toast.error((e as Error).message); }
-  }
-  useEffect(() => { reload(); }, []);
-
-  const receitas = rows.filter((r) => r.tipo === "receita" && r.status === "pago").reduce((a, r) => a + r.valor_cents, 0) / 100;
-  const despesas = rows.filter((r) => r.tipo === "despesa" && r.status === "pago").reduce((a, r) => a + r.valor_cents, 0) / 100;
-  const areceber = rows.filter((r) => r.tipo === "receita" && r.status === "pendente").reduce((a, r) => a + r.valor_cents, 0) / 100;
-  const apagar = rows.filter((r) => r.tipo === "despesa" && r.status === "pendente").reduce((a, r) => a + r.valor_cents, 0) / 100;
-
-  async function submit() {
-    if (!form.descricao.trim()) return toast.error("Descrição obrigatória");
-    try {
-      await create({
+  const create = useMutation({
+    mutationFn: () =>
+      createLancamento({
         data: {
           tipo: form.tipo,
           descricao: form.descricao.trim(),
@@ -90,18 +83,34 @@ function Financeiro() {
           data: form.data,
           status: form.status,
         },
-      });
+      }),
+    onSuccess: () => {
       toast.success("Lançamento criado");
       setOpen(false);
       setForm({ ...form, descricao: "", valor: 0, categoria: "" });
-      reload();
-    } catch (e) { toast.error((e as Error).message); }
+      invalidate();
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const del = useMutation({
+    mutationFn: (id: string) => deleteLancamento({ data: { id } }),
+    onSuccess: () => {
+      toast.success("Removido");
+      invalidate();
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  function submit() {
+    if (!form.descricao.trim()) return toast.error("Descrição obrigatória");
+    create.mutate();
   }
 
-  async function del(id: string) {
-    try { await remove({ data: { id } }); toast.success("Removido"); reload(); }
-    catch (e) { toast.error((e as Error).message); }
-  }
+  const receitas = rows.filter((r) => r.tipo === "receita" && r.status === "pago").reduce((a, r) => a + r.valor_cents, 0) / 100;
+  const despesas = rows.filter((r) => r.tipo === "despesa" && r.status === "pago").reduce((a, r) => a + r.valor_cents, 0) / 100;
+  const areceber = rows.filter((r) => r.tipo === "receita" && r.status === "pendente").reduce((a, r) => a + r.valor_cents, 0) / 100;
+  const apagar = rows.filter((r) => r.tipo === "despesa" && r.status === "pendente").reduce((a, r) => a + r.valor_cents, 0) / 100;
 
   return (
     <>
@@ -159,7 +168,7 @@ function Financeiro() {
               </div>
               <DialogFooter>
                 <Button variant="outline" onClick={() => setOpen(false)}>Cancelar</Button>
-                <Button onClick={submit}>Salvar</Button>
+                <Button onClick={submit} disabled={create.isPending}>Salvar</Button>
               </DialogFooter>
             </DialogContent>
           </Dialog>
@@ -197,7 +206,7 @@ function Financeiro() {
                     {r.tipo === "receita" ? "+" : "-"}{brl(r.valor_cents / 100)}
                   </td>
                   <td className="px-4 py-2.5 text-right">
-                    <button onClick={() => del(r.id)} className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive">
+                    <button onClick={() => del.mutate(r.id)} className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive">
                       <Trash2 className="h-3.5 w-3.5" />
                     </button>
                   </td>

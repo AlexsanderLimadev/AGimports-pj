@@ -15,6 +15,7 @@ import {
   Zap,
   FileText,
   Settings,
+  Truck,
 } from "lucide-react";
 import {
   Sidebar,
@@ -44,6 +45,7 @@ const groups: { label: string; items: { title: string; url: string; icon: any }[
     items: [
       { title: "Produtos", url: "/app/produtos", icon: Package },
       { title: "Estoque", url: "/app/estoque", icon: Boxes },
+      { title: "Fornecedores", url: "/app/fornecedores", icon: Truck },
     ],
   },
   {
