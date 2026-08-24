@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
-import { useServerFn } from "@tanstack/react-start";
+import { queryOptions, useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
+import { useMemo, useState } from "react";
 import { PageHeader, SectionCard } from "@/components/ui-bits";
 import { brl, pct } from "@/lib/mock/data";
 import { Save, Trash2 } from "lucide-react";
@@ -13,6 +13,7 @@ import {
 
 export const Route = createFileRoute("/_authenticated/app/calculadora")({
   head: () => ({ meta: [{ title: "Calculadora · AG Imports" }] }),
+  loader: ({ context }) => context.queryClient.ensureQueryData(historicoOptions),
   component: Calc,
 });
 
@@ -94,20 +95,36 @@ type Historico = {
   created_at: string;
 };
 
+const historicoOptions = queryOptions({
+  queryKey: ["calculo-historico"],
+  queryFn: () => listCalculos() as Promise<Historico[]>,
+});
+
 function Calc() {
-  const save = useServerFn(saveCalculo);
-  const list = useServerFn(listCalculos);
-  const remove = useServerFn(deleteCalculo);
+  const { data: historico } = useSuspenseQuery(historicoOptions);
+  const qc = useQueryClient();
+  const invalidate = () => qc.invalidateQueries({ queryKey: ["calculo-historico"] });
+
   const [i, setI] = useState<Inputs>(initial);
   const [nome, setNome] = useState("");
-  const [historico, setHistorico] = useState<Historico[]>([]);
   const set = <K extends keyof Inputs>(k: K) => (v: number) => setI((s) => ({ ...s, [k]: v }));
 
-  async function reload() {
-    try { setHistorico((await list()) as Historico[]); }
-    catch (e) { toast.error((e as Error).message); }
-  }
-  useEffect(() => { reload(); }, []);
+  const save = useMutation({
+    mutationFn: (payload: { nome: string | null; custo_cents: number; frete_cents: number; impostos_pct: number; margem_pct: number; preco_final_cents: number; params: Record<string, unknown> }) =>
+      saveCalculo({ data: payload }),
+    onSuccess: () => {
+      toast.success("Cenário salvo");
+      setNome("");
+      invalidate();
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const remove = useMutation({
+    mutationFn: (id: string) => deleteCalculo({ data: { id } }),
+    onSuccess: () => { toast.success("Removido"); invalidate(); },
+    onError: (e: Error) => toast.error(e.message),
+  });
 
   const r = useMemo(() => {
     const custoDireto =
@@ -170,25 +187,19 @@ function Calc() {
               className="h-8 rounded-md border border-border bg-background px-2.5 text-xs focus:border-primary/50 focus:outline-none"
             />
             <button
-              onClick={async () => {
-                try {
-                  await save({
-                    data: {
-                      nome: nome.trim() || null,
-                      custo_cents: Math.round(r.custoImportacao * 100),
-                      frete_cents: Math.round((i.freteInt + i.freteNac) * 100),
-                      impostos_pct: i.impostosImp + i.icms + i.ipi + i.pis + i.cofins,
-                      margem_pct: i.margem,
-                      preco_final_cents: Math.round(r.preco * 100),
-                      params: i as unknown as Record<string, unknown>,
-                    },
-                  });
-                  toast.success("Cenário salvo");
-                  setNome("");
-                  reload();
-                } catch (e) { toast.error((e as Error).message); }
-              }}
-              className="inline-flex items-center gap-1.5 rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground hover:bg-primary/90"
+              onClick={() =>
+                save.mutate({
+                  nome: nome.trim() || null,
+                  custo_cents: Math.round(r.custoImportacao * 100),
+                  frete_cents: Math.round((i.freteInt + i.freteNac) * 100),
+                  impostos_pct: i.impostosImp + i.icms + i.ipi + i.pis + i.cofins,
+                  margem_pct: i.margem,
+                  preco_final_cents: Math.round(r.preco * 100),
+                  params: i as unknown as Record<string, unknown>,
+                })
+              }
+              disabled={save.isPending}
+              className="inline-flex items-center gap-1.5 rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
             >
               <Save className="h-3.5 w-3.5" /> Salvar cenário
             </button>
@@ -273,10 +284,7 @@ function Calc() {
                 <div className="flex items-center gap-3">
                   <span className="tabular text-sm font-semibold">{brl(h.preco_final_cents / 100)}</span>
                   <button
-                    onClick={async () => {
-                      try { await remove({ data: { id: h.id } }); toast.success("Removido"); reload(); }
-                      catch (e) { toast.error((e as Error).message); }
-                    }}
+                    onClick={() => remove.mutate(h.id)}
                     className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive"
                   >
                     <Trash2 className="h-3.5 w-3.5" />

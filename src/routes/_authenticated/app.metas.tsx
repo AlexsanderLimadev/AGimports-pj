@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
-import { useServerFn } from "@tanstack/react-start";
+import { queryOptions, useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
+import { useState } from "react";
 import { PageHeader, SectionCard } from "@/components/ui-bits";
 import { Button } from "@/components/ui/button";
 import {
@@ -24,11 +24,6 @@ import { Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { createMeta, deleteMeta, listMetas } from "@/lib/metas.functions";
 
-export const Route = createFileRoute("/_authenticated/app/metas")({
-  head: () => ({ meta: [{ title: "Metas · AG Imports" }] }),
-  component: Metas,
-});
-
 type Meta = {
   id: string;
   nome: string;
@@ -48,6 +43,17 @@ const TIPO_LABEL: Record<Meta["tipo"], { label: string; unit: string }> = {
   ticket_medio: { label: "Ticket médio", unit: "R$" },
 };
 
+const metasOptions = queryOptions({
+  queryKey: ["metas"],
+  queryFn: () => listMetas() as Promise<Meta[]>,
+});
+
+export const Route = createFileRoute("/_authenticated/app/metas")({
+  head: () => ({ meta: [{ title: "Metas · AG Imports" }] }),
+  loader: ({ context }) => context.queryClient.ensureQueryData(metasOptions),
+  component: Metas,
+});
+
 function Ring({ progress }: { progress: number }) {
   const r = 34;
   const c = 2 * Math.PI * r;
@@ -61,10 +67,10 @@ function Ring({ progress }: { progress: number }) {
 }
 
 function Metas() {
-  const list = useServerFn(listMetas);
-  const create = useServerFn(createMeta);
-  const remove = useServerFn(deleteMeta);
-  const [rows, setRows] = useState<Meta[]>([]);
+  const { data: rows } = useSuspenseQuery(metasOptions);
+  const qc = useQueryClient();
+  const invalidate = () => qc.invalidateQueries({ queryKey: ["metas"] });
+
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({
     nome: "",
@@ -74,27 +80,30 @@ function Metas() {
     starts_at: new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().slice(0, 10),
   });
 
-  async function reload() {
-    try { setRows((await list()) as Meta[]); }
-    catch (e) { toast.error((e as Error).message); }
-  }
-  useEffect(() => { reload(); }, []);
-
-  async function submit() {
-    if (!form.nome.trim()) return toast.error("Nome obrigatório");
-    if (form.alvo <= 0) return toast.error("Meta deve ser > 0");
-    try {
-      await create({ data: { ...form, nome: form.nome.trim() } });
+  const create = useMutation({
+    mutationFn: () => createMeta({ data: { ...form, nome: form.nome.trim() } }),
+    onSuccess: () => {
       toast.success("Meta criada");
       setOpen(false);
       setForm({ ...form, nome: "", alvo: 0 });
-      reload();
-    } catch (e) { toast.error((e as Error).message); }
-  }
+      invalidate();
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
 
-  async function del(id: string) {
-    try { await remove({ data: { id } }); toast.success("Removida"); reload(); }
-    catch (e) { toast.error((e as Error).message); }
+  const del = useMutation({
+    mutationFn: (id: string) => deleteMeta({ data: { id } }),
+    onSuccess: () => {
+      toast.success("Removida");
+      invalidate();
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  function submit() {
+    if (!form.nome.trim()) return toast.error("Nome obrigatório");
+    if (form.alvo <= 0) return toast.error("Meta deve ser > 0");
+    create.mutate();
   }
 
   return (
@@ -138,7 +147,7 @@ function Metas() {
               </div>
               <DialogFooter>
                 <Button variant="outline" onClick={() => setOpen(false)}>Cancelar</Button>
-                <Button onClick={submit}>Criar</Button>
+                <Button onClick={submit} disabled={create.isPending}>Criar</Button>
               </DialogFooter>
             </DialogContent>
           </Dialog>
@@ -158,7 +167,7 @@ function Metas() {
               <div className="min-w-0 flex-1">
                 <div className="flex items-start justify-between gap-2">
                   <div className="text-xs text-muted-foreground">{m.nome}</div>
-                  <button onClick={() => del(m.id)} className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive"><Trash2 className="h-3.5 w-3.5" /></button>
+                  <button onClick={() => del.mutate(m.id)} className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive"><Trash2 className="h-3.5 w-3.5" /></button>
                 </div>
                 <div className="tabular mt-1 text-lg font-semibold">
                   {info.unit && `${info.unit} `}{m.atual.toLocaleString("pt-BR", { maximumFractionDigits: 0 })}

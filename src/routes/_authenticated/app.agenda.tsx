@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { queryOptions, useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
-import { useServerFn } from "@tanstack/react-start";
 import { PageHeader, SectionCard } from "@/components/ui-bits";
 import { Button } from "@/components/ui/button";
 import {
@@ -31,8 +31,21 @@ import {
 
 export const Route = createFileRoute("/_authenticated/app/agenda")({
   head: () => ({ meta: [{ title: "Agenda · AG Imports" }] }),
+  loader: ({ context }) => {
+    const d = new Date();
+    const from = new Date(d.getFullYear(), d.getMonth(), 1).toISOString();
+    const to = new Date(d.getFullYear(), d.getMonth() + 1, 1).toISOString();
+    return context.queryClient.ensureQueryData(eventosOptions(from, to));
+  },
   component: Agenda,
 });
+
+function eventosOptions(from: string, to: string) {
+  return queryOptions({
+    queryKey: ["eventos", from, to],
+    queryFn: () => listEventos({ data: { from, to } }) as Promise<Evento[]>,
+  });
+}
 
 type Evento = {
   id: string;
@@ -52,15 +65,10 @@ const MESES = [
 ];
 
 function Agenda() {
-  const list = useServerFn(listEventos);
-  const create = useServerFn(createEvento);
-  const remove = useServerFn(deleteEvento);
-
   const [cursor, setCursor] = useState(() => {
     const d = new Date();
     return new Date(d.getFullYear(), d.getMonth(), 1);
   });
-  const [eventos, setEventos] = useState<Evento[]>([]);
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({
     titulo: "",
@@ -74,30 +82,45 @@ function Agenda() {
   const nextMonth = new Date(cursor.getFullYear(), cursor.getMonth() + 1, 1);
   const to = nextMonth.toISOString();
 
-  async function reload() {
-    try {
-      const rows = await list({ data: { from, to } });
-      setEventos(rows as Evento[]);
-    } catch (e) {
-      toast.error((e as Error).message);
-    }
-  }
+  const opts = eventosOptions(from, to);
+  const { data: eventos } = useSuspenseQuery(opts);
+  const qc = useQueryClient();
+  const invalidate = () => qc.invalidateQueries({ queryKey: ["eventos"] });
 
+  // Realtime: qualquer mudança na tabela eventos (de qualquer aba/dispositivo)
+  // invalida a query e recarrega sozinho, sem precisar de reload manual.
   useEffect(() => {
-    reload();
     const channel = supabase
       .channel("eventos-realtime")
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "eventos" },
-        () => reload(),
+        () => invalidate(),
       )
       .subscribe();
     return () => {
       supabase.removeChannel(channel);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [from, to]);
+  }, []);
+
+  const create = useMutation({
+    mutationFn: (payload: { titulo: string; tipo: string; status: string; starts_at: string; all_day: boolean }) =>
+      createEvento({ data: payload as any }),
+    onSuccess: () => {
+      toast.success("Evento criado");
+      setOpen(false);
+      setForm({ ...form, titulo: "" });
+      invalidate();
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const remove = useMutation({
+    mutationFn: (id: string) => deleteEvento({ data: { id } }),
+    onSuccess: () => { toast.success("Removido"); invalidate(); },
+    onError: (e: Error) => toast.error(e.message),
+  });
 
   const grid = useMemo(() => {
     const first = new Date(cursor.getFullYear(), cursor.getMonth(), 1);
@@ -127,34 +150,16 @@ function Agenda() {
   const hojeStr = new Date().toISOString().slice(0, 10);
   const selectedList = selectedDate ? (eventosPorDia.get(selectedDate) ?? []) : (eventosPorDia.get(hojeStr) ?? []);
 
-  async function submit() {
+  function submit() {
     if (!form.titulo.trim()) return toast.error("Título obrigatório");
     const starts = new Date(`${form.data}T${form.hora}:00`).toISOString();
-    try {
-      await create({
-        data: {
-          titulo: form.titulo.trim(),
-          tipo: form.tipo as (typeof TIPOS)[number],
-          status: "pendente",
-          starts_at: starts,
-          all_day: false,
-        },
-      });
-      toast.success("Evento criado");
-      setOpen(false);
-      setForm({ ...form, titulo: "" });
-    } catch (e) {
-      toast.error((e as Error).message);
-    }
-  }
-
-  async function del(id: string) {
-    try {
-      await remove({ data: { id } });
-      toast.success("Removido");
-    } catch (e) {
-      toast.error((e as Error).message);
-    }
+    create.mutate({
+      titulo: form.titulo.trim(),
+      tipo: form.tipo,
+      status: "pendente",
+      starts_at: starts,
+      all_day: false,
+    });
   }
 
   return (
@@ -196,7 +201,7 @@ function Agenda() {
               </div>
               <DialogFooter>
                 <Button variant="outline" onClick={() => setOpen(false)}>Cancelar</Button>
-                <Button onClick={submit}>Criar</Button>
+                <Button onClick={submit} disabled={create.isPending}>Criar</Button>
               </DialogFooter>
             </DialogContent>
           </Dialog>
@@ -269,7 +274,7 @@ function Agenda() {
                   <div className="text-[11px] text-primary capitalize">{e.tipo}</div>
                 </div>
                 <button
-                  onClick={() => del(e.id)}
+                  onClick={() => remove.mutate(e.id)}
                   className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive"
                   aria-label="Excluir"
                 >

@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
-import { useServerFn } from "@tanstack/react-start";
+import { queryOptions, useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
+import { useState } from "react";
 import { PageHeader, SectionCard } from "@/components/ui-bits";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
@@ -23,11 +23,6 @@ import {
   toggleAutomacao,
 } from "@/lib/automacoes.functions";
 
-export const Route = createFileRoute("/_authenticated/app/automacoes")({
-  head: () => ({ meta: [{ title: "Automações · AG Imports" }] }),
-  component: Auto,
-});
-
 type Automacao = {
   id: string;
   nome: string;
@@ -36,41 +31,65 @@ type Automacao = {
   ativo: boolean;
 };
 
+const automacoesOptions = queryOptions({
+  queryKey: ["automacoes"],
+  queryFn: () => listAutomacoes() as Promise<Automacao[]>,
+});
+
+export const Route = createFileRoute("/_authenticated/app/automacoes")({
+  head: () => ({ meta: [{ title: "Automações · AG Imports" }] }),
+  loader: ({ context }) => context.queryClient.ensureQueryData(automacoesOptions),
+  component: Auto,
+});
+
 function Auto() {
-  const list = useServerFn(listAutomacoes);
-  const create = useServerFn(createAutomacao);
-  const toggle = useServerFn(toggleAutomacao);
-  const remove = useServerFn(deleteAutomacao);
-  const [rows, setRows] = useState<Automacao[]>([]);
+  const { data: rows } = useSuspenseQuery(automacoesOptions);
+  const qc = useQueryClient();
+  const invalidate = () => qc.invalidateQueries({ queryKey: ["automacoes"] });
+
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({ nome: "", gatilho: "", acao: "" });
 
-  async function reload() {
-    try { setRows((await list()) as Automacao[]); }
-    catch (e) { toast.error((e as Error).message); }
-  }
-  useEffect(() => { reload(); }, []);
-
-  async function submit() {
-    if (!form.nome.trim() || !form.gatilho.trim() || !form.acao.trim()) return toast.error("Preencha todos os campos");
-    try {
-      await create({ data: { ...form, ativo: true, config: {} } });
+  const create = useMutation({
+    mutationFn: () => createAutomacao({ data: { ...form, ativo: true, config: {} } }),
+    onSuccess: () => {
       toast.success("Regra criada");
       setOpen(false);
       setForm({ nome: "", gatilho: "", acao: "" });
-      reload();
-    } catch (e) { toast.error((e as Error).message); }
-  }
+      invalidate();
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
 
-  async function onToggle(id: string, ativo: boolean) {
-    setRows((prev) => prev.map((a) => (a.id === id ? { ...a, ativo } : a)));
-    try { await toggle({ data: { id, ativo } }); }
-    catch (e) { toast.error((e as Error).message); reload(); }
-  }
+  const toggle = useMutation({
+    mutationFn: ({ id, ativo }: { id: string; ativo: boolean }) => toggleAutomacao({ data: { id, ativo } }),
+    onMutate: async ({ id, ativo }) => {
+      await qc.cancelQueries({ queryKey: ["automacoes"] });
+      const previous = qc.getQueryData(automacoesOptions.queryKey);
+      qc.setQueryData(automacoesOptions.queryKey, (old) =>
+        old ? old.map((a) => (a.id === id ? { ...a, ativo } : a)) : old,
+      );
+      return { previous };
+    },
+    onError: (e: Error, _v, ctx) => {
+      toast.error(e.message);
+      if (ctx?.previous) qc.setQueryData(automacoesOptions.queryKey, ctx.previous);
+    },
+    onSettled: invalidate,
+  });
 
-  async function del(id: string) {
-    try { await remove({ data: { id } }); toast.success("Removida"); reload(); }
-    catch (e) { toast.error((e as Error).message); }
+  const del = useMutation({
+    mutationFn: (id: string) => deleteAutomacao({ data: { id } }),
+    onSuccess: () => {
+      toast.success("Removida");
+      invalidate();
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  function submit() {
+    if (!form.nome.trim() || !form.gatilho.trim() || !form.acao.trim()) return toast.error("Preencha todos os campos");
+    create.mutate();
   }
 
   return (
@@ -90,7 +109,7 @@ function Auto() {
               </div>
               <DialogFooter>
                 <Button variant="outline" onClick={() => setOpen(false)}>Cancelar</Button>
-                <Button onClick={submit}>Criar</Button>
+                <Button onClick={submit} disabled={create.isPending}>Criar</Button>
               </DialogFooter>
             </DialogContent>
           </Dialog>
@@ -110,8 +129,8 @@ function Auto() {
                 </div>
               </div>
               <div className="flex items-center gap-3">
-                <Switch checked={a.ativo} onCheckedChange={(v) => onToggle(a.id, v)} />
-                <button onClick={() => del(a.id)} className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive"><Trash2 className="h-3.5 w-3.5" /></button>
+                <Switch checked={a.ativo} onCheckedChange={(v) => toggle.mutate({ id: a.id, ativo: v })} />
+                <button onClick={() => del.mutate(a.id)} className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive"><Trash2 className="h-3.5 w-3.5" /></button>
               </div>
             </div>
           ))}

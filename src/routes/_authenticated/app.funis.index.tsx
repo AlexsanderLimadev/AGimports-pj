@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
-import { useServerFn } from "@tanstack/react-start";
+import { queryOptions, useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
+import { useState } from "react";
 import { PageHeader, SectionCard } from "@/components/ui-bits";
 import { GitBranch, Plus, Trash2 } from "lucide-react";
 import {
@@ -12,13 +12,19 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { createFunil, deleteFunil, listFunis } from "@/lib/funis.functions";
 
-export const Route = createFileRoute("/_authenticated/app/funis/")({
-  head: () => ({ meta: [{ title: "Funis · AG Imports" }] }),
-  component: Funis,
-});
-
 type Etapa = { id: string; ordem: number; nome: string; pessoas: number; conv: number; valor_cents: number; cor: string | null };
 type Funil = { id: string; nome: string; slug: string; etapas: Etapa[] };
+
+const funisOptions = queryOptions({
+  queryKey: ["funis"],
+  queryFn: () => listFunis() as Promise<Funil[]>,
+});
+
+export const Route = createFileRoute("/_authenticated/app/funis/")({
+  head: () => ({ meta: [{ title: "Funis · AG Imports" }] }),
+  loader: ({ context }) => context.queryClient.ensureQueryData(funisOptions),
+  component: Funis,
+});
 
 const TEMPLATES: Record<string, { nome: string; etapas: string[] }> = {
   "E-commerce clássico": { nome: "E-commerce clássico", etapas: ["Visitantes", "Cliques", "Carrinho", "Checkout", "Compra"] },
@@ -28,27 +34,20 @@ const TEMPLATES: Record<string, { nome: string; etapas: string[] }> = {
 };
 
 function Funis() {
-  const list = useServerFn(listFunis);
-  const create = useServerFn(createFunil);
-  const remove = useServerFn(deleteFunil);
-  const [rows, setRows] = useState<Funil[]>([]);
+  const { data: rows } = useSuspenseQuery(funisOptions);
+  const qc = useQueryClient();
+  const invalidate = () => qc.invalidateQueries({ queryKey: ["funis"] });
   const [open, setOpen] = useState(false);
   const [nome, setNome] = useState("");
   const navigate = useNavigate();
 
-  async function reload() {
-    try { setRows((await list()) as Funil[]); }
-    catch (e) { toast.error((e as Error).message); }
-  }
-  useEffect(() => { reload(); }, []);
-
-  async function createFunnel(template?: string) {
-    const tpl = template ? TEMPLATES[template] : null;
-    const displayNome = (tpl?.nome ?? nome).trim();
-    if (!displayNome) return toast.error("Informe o nome do funil");
-    const etapaNomes = tpl?.etapas ?? ["Visitantes", "Leads", "Compra"];
-    try {
-      const res = await create({
+  const create = useMutation({
+    mutationFn: (template?: string) => {
+      const tpl = template ? TEMPLATES[template] : null;
+      const displayNome = (tpl?.nome ?? nome).trim();
+      if (!displayNome) throw new Error("Informe o nome do funil");
+      const etapaNomes = tpl?.etapas ?? ["Visitantes", "Leads", "Compra"];
+      return createFunil({
         data: {
           nome: displayNome,
           etapas: etapaNomes.map((n, i) => ({
@@ -59,16 +58,25 @@ function Funis() {
           })),
         },
       });
+    },
+    onSuccess: (res) => {
       setNome("");
       setOpen(false);
       toast.success("Funil criado");
+      invalidate();
       navigate({ to: "/app/funis/$id", params: { id: res.id } });
-    } catch (e) { toast.error((e as Error).message); }
-  }
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
 
-  async function del(id: string) {
-    try { await remove({ data: { id } }); toast.success("Removido"); reload(); }
-    catch (e) { toast.error((e as Error).message); }
+  const del = useMutation({
+    mutationFn: (id: string) => deleteFunil({ data: { id } }),
+    onSuccess: () => { toast.success("Removido"); invalidate(); },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  function createFunnel(template?: string) {
+    create.mutate(template);
   }
 
   return (
@@ -110,7 +118,7 @@ function Funis() {
                 </div>
                 <div className="flex items-center gap-2">
                   <button
-                    onClick={(e) => { e.preventDefault(); e.stopPropagation(); del(f.id); }}
+                    onClick={(e) => { e.preventDefault(); e.stopPropagation(); del.mutate(f.id); }}
                     className="relative z-10 grid h-9 w-9 place-items-center rounded-md border border-border text-muted-foreground opacity-0 transition hover:border-destructive/60 hover:text-destructive group-hover:opacity-100"
                     aria-label="Remover"
                   >

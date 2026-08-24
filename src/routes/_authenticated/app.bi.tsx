@@ -1,6 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
-import { useServerFn } from "@tanstack/react-start";
+import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import { KpiCard, PageHeader, SectionCard } from "@/components/ui-bits";
 import { brl } from "@/lib/mock/data";
 import {
@@ -8,10 +7,15 @@ import {
   Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis,
 } from "recharts";
 import { biOverview } from "@/lib/bi.functions";
-import { toast } from "sonner";
+
+const biOptions = queryOptions({
+  queryKey: ["bi-overview"],
+  queryFn: () => biOverview({ data: {} }) as unknown as Promise<Overview>,
+});
 
 export const Route = createFileRoute("/_authenticated/app/bi")({
   head: () => ({ meta: [{ title: "BI · AG Imports" }] }),
+  loader: ({ context }) => context.queryClient.ensureQueryData(biOptions),
   component: BI,
 });
 
@@ -41,25 +45,7 @@ type Overview = {
 };
 
 function BI() {
-  const load = useServerFn(biOverview);
-  const [data, setData] = useState<Overview | null>(null);
-
-  useEffect(() => {
-    load({ data: {} })
-      .then((d) => setData(d as unknown as Overview))
-      .catch((e) => toast.error((e as Error).message));
-  }, [load]);
-
-
-  if (!data) {
-    return (
-      <>
-        <PageHeader title="Business Intelligence" description="Insights em tempo real" />
-        <p className="text-sm text-muted-foreground">Carregando…</p>
-      </>
-    );
-  }
-
+  const { data } = useSuspenseQuery(biOptions);
   const { canais, topProdutos, faturamentoMensal, kpis } = data;
 
   return (

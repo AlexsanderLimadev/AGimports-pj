@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
-import { useServerFn } from "@tanstack/react-start";
+import { queryOptions, useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
+import { useState } from "react";
 import { KpiCard, PageHeader, SectionCard } from "@/components/ui-bits";
 import { Button } from "@/components/ui/button";
 import {
@@ -30,11 +30,6 @@ import {
   listCampanhas,
 } from "@/lib/marketing.functions";
 
-export const Route = createFileRoute("/_authenticated/app/marketing")({
-  head: () => ({ meta: [{ title: "Marketing · AG Imports" }] }),
-  component: Marketing,
-});
-
 type Campanha = {
   id: string;
   nome: string;
@@ -45,11 +40,22 @@ type Campanha = {
   receita_cents: number;
 };
 
+const campanhasOptions = queryOptions({
+  queryKey: ["campanhas"],
+  queryFn: () => listCampanhas() as Promise<Campanha[]>,
+});
+
+export const Route = createFileRoute("/_authenticated/app/marketing")({
+  head: () => ({ meta: [{ title: "Marketing · AG Imports" }] }),
+  loader: ({ context }) => context.queryClient.ensureQueryData(campanhasOptions),
+  component: Marketing,
+});
+
 function Marketing() {
-  const list = useServerFn(listCampanhas);
-  const create = useServerFn(createCampanha);
-  const remove = useServerFn(deleteCampanha);
-  const [rows, setRows] = useState<Campanha[]>([]);
+  const { data: rows } = useSuspenseQuery(campanhasOptions);
+  const qc = useQueryClient();
+  const invalidate = () => qc.invalidateQueries({ queryKey: ["campanhas"] });
+
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({
     nome: "",
@@ -60,12 +66,6 @@ function Marketing() {
     receita: 0,
   });
 
-  async function reload() {
-    try { setRows((await list()) as Campanha[]); }
-    catch (e) { toast.error((e as Error).message); }
-  }
-  useEffect(() => { reload(); }, []);
-
   const invest = rows.reduce((a, c) => a + c.gasto_cents, 0) / 100;
   const receita = rows.reduce((a, c) => a + c.receita_cents, 0) / 100;
   const roas = invest > 0 ? receita / invest : 0;
@@ -75,10 +75,9 @@ function Marketing() {
     roas: c.gasto_cents > 0 ? c.receita_cents / c.gasto_cents : 0,
   }));
 
-  async function submit() {
-    if (!form.nome.trim()) return toast.error("Nome obrigatório");
-    try {
-      await create({
+  const create = useMutation({
+    mutationFn: () =>
+      createCampanha({
         data: {
           nome: form.nome.trim(),
           canal: form.canal,
@@ -87,17 +86,25 @@ function Marketing() {
           gasto_cents: Math.round(form.gasto * 100),
           receita_cents: Math.round(form.receita * 100),
         },
-      });
+      }),
+    onSuccess: () => {
       toast.success("Campanha criada");
       setOpen(false);
       setForm({ ...form, nome: "", budget: 0, gasto: 0, receita: 0 });
-      reload();
-    } catch (e) { toast.error((e as Error).message); }
-  }
+      invalidate();
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
 
-  async function del(id: string) {
-    try { await remove({ data: { id } }); toast.success("Removida"); reload(); }
-    catch (e) { toast.error((e as Error).message); }
+  const del = useMutation({
+    mutationFn: (id: string) => deleteCampanha({ data: { id } }),
+    onSuccess: () => { toast.success("Removida"); invalidate(); },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  function submit() {
+    if (!form.nome.trim()) return toast.error("Nome obrigatório");
+    create.mutate();
   }
 
   return (
@@ -148,7 +155,7 @@ function Marketing() {
               </div>
               <DialogFooter>
                 <Button variant="outline" onClick={() => setOpen(false)}>Cancelar</Button>
-                <Button onClick={submit}>Criar</Button>
+                <Button onClick={submit} disabled={create.isPending}>Criar</Button>
               </DialogFooter>
             </DialogContent>
           </Dialog>
@@ -202,7 +209,7 @@ function Marketing() {
                     <td className="px-4 py-2.5 tabular text-right">{brl(c.receita_cents / 100)}</td>
                     <td className="px-4 py-2.5 tabular text-right text-primary">{r.toFixed(2)}x</td>
                     <td className="px-4 py-2.5 text-right">
-                      <button onClick={() => del(c.id)} className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive"><Trash2 className="h-3.5 w-3.5" /></button>
+                      <button onClick={() => del.mutate(c.id)} className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive"><Trash2 className="h-3.5 w-3.5" /></button>
                     </td>
                   </tr>
                 );
