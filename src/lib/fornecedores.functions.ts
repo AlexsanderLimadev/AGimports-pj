@@ -21,7 +21,8 @@ export const listSuppliers = createServerFn({ method: "GET" })
       .from("suppliers")
       .select("id, name, contact_name, phone, email, notes, is_international, created_at, products(id, cost_cents)")
       .is("deleted_at", null)
-      .order("name", { ascending: true });
+      .order("name", { ascending: true })
+      .limit(500);
     if (error) throw new Error(error.message);
     return (data ?? []).map((s: any) => ({
       ...s,

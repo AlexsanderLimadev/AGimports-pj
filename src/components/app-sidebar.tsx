@@ -16,6 +16,7 @@ import {
   FileText,
   Settings,
   Truck,
+  TrendingUp,
 } from "lucide-react";
 import {
   Sidebar,
@@ -68,6 +69,7 @@ const groups: { label: string; items: { title: string; url: string; icon: any }[
     items: [
       { title: "Marketing", url: "/app/marketing", icon: Megaphone },
       { title: "Automações", url: "/app/automacoes", icon: Zap },
+      { title: "Métricas de Negócio", url: "/app/metricas", icon: TrendingUp },
     ],
   },
   {

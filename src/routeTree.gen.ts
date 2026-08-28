@@ -28,6 +28,7 @@ import { Route as AuthenticatedAppFinanceiroRouteImport } from './routes/_authen
 import { Route as AuthenticatedAppFornecedoresRouteImport } from './routes/_authenticated/app.fornecedores'
 import { Route as AuthenticatedAppMarketingRouteImport } from './routes/_authenticated/app.marketing'
 import { Route as AuthenticatedAppMetasRouteImport } from './routes/_authenticated/app.metas'
+import { Route as AuthenticatedAppMetricasRouteImport } from './routes/_authenticated/app.metricas'
 import { Route as AuthenticatedAppPedidosRouteImport } from './routes/_authenticated/app.pedidos'
 import { Route as AuthenticatedAppProdutosRouteImport } from './routes/_authenticated/app.produtos'
 import { Route as AuthenticatedAppRelatoriosRouteImport } from './routes/_authenticated/app.relatorios'
@@ -135,6 +136,12 @@ const AuthenticatedAppMetasRoute = AuthenticatedAppMetasRouteImport.update({
   path: '/metas',
   getParentRoute: () => AuthenticatedAppRoute,
 } as any)
+const AuthenticatedAppMetricasRoute =
+  AuthenticatedAppMetricasRouteImport.update({
+    id: '/metricas',
+    path: '/metricas',
+    getParentRoute: () => AuthenticatedAppRoute,
+  } as any)
 const AuthenticatedAppPedidosRoute = AuthenticatedAppPedidosRouteImport.update({
   id: '/pedidos',
   path: '/pedidos',
@@ -182,6 +189,7 @@ export interface FileRoutesByFullPath {
   '/app/fornecedores': typeof AuthenticatedAppFornecedoresRoute
   '/app/marketing': typeof AuthenticatedAppMarketingRoute
   '/app/metas': typeof AuthenticatedAppMetasRoute
+  '/app/metricas': typeof AuthenticatedAppMetricasRoute
   '/app/pedidos': typeof AuthenticatedAppPedidosRoute
   '/app/produtos': typeof AuthenticatedAppProdutosRoute
   '/app/relatorios': typeof AuthenticatedAppRelatoriosRoute
@@ -206,6 +214,7 @@ export interface FileRoutesByTo {
   '/app/fornecedores': typeof AuthenticatedAppFornecedoresRoute
   '/app/marketing': typeof AuthenticatedAppMarketingRoute
   '/app/metas': typeof AuthenticatedAppMetasRoute
+  '/app/metricas': typeof AuthenticatedAppMetricasRoute
   '/app/pedidos': typeof AuthenticatedAppPedidosRoute
   '/app/produtos': typeof AuthenticatedAppProdutosRoute
   '/app/relatorios': typeof AuthenticatedAppRelatoriosRoute
@@ -233,6 +242,7 @@ export interface FileRoutesById {
   '/_authenticated/app/fornecedores': typeof AuthenticatedAppFornecedoresRoute
   '/_authenticated/app/marketing': typeof AuthenticatedAppMarketingRoute
   '/_authenticated/app/metas': typeof AuthenticatedAppMetasRoute
+  '/_authenticated/app/metricas': typeof AuthenticatedAppMetricasRoute
   '/_authenticated/app/pedidos': typeof AuthenticatedAppPedidosRoute
   '/_authenticated/app/produtos': typeof AuthenticatedAppProdutosRoute
   '/_authenticated/app/relatorios': typeof AuthenticatedAppRelatoriosRoute
@@ -260,6 +270,7 @@ export interface FileRouteTypes {
     | '/app/fornecedores'
     | '/app/marketing'
     | '/app/metas'
+    | '/app/metricas'
     | '/app/pedidos'
     | '/app/produtos'
     | '/app/relatorios'
@@ -284,6 +295,7 @@ export interface FileRouteTypes {
     | '/app/fornecedores'
     | '/app/marketing'
     | '/app/metas'
+    | '/app/metricas'
     | '/app/pedidos'
     | '/app/produtos'
     | '/app/relatorios'
@@ -310,6 +322,7 @@ export interface FileRouteTypes {
     | '/_authenticated/app/fornecedores'
     | '/_authenticated/app/marketing'
     | '/_authenticated/app/metas'
+    | '/_authenticated/app/metricas'
     | '/_authenticated/app/pedidos'
     | '/_authenticated/app/produtos'
     | '/_authenticated/app/relatorios'
@@ -462,6 +475,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppMetasRouteImport
       parentRoute: typeof AuthenticatedAppRoute
     }
+    '/_authenticated/app/metricas': {
+      id: '/_authenticated/app/metricas'
+      path: '/metricas'
+      fullPath: '/app/metricas'
+      preLoaderRoute: typeof AuthenticatedAppMetricasRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
     '/_authenticated/app/pedidos': {
       id: '/_authenticated/app/pedidos'
       path: '/pedidos'
@@ -512,6 +532,7 @@ interface AuthenticatedAppRouteChildren {
   AuthenticatedAppFornecedoresRoute: typeof AuthenticatedAppFornecedoresRoute
   AuthenticatedAppMarketingRoute: typeof AuthenticatedAppMarketingRoute
   AuthenticatedAppMetasRoute: typeof AuthenticatedAppMetasRoute
+  AuthenticatedAppMetricasRoute: typeof AuthenticatedAppMetricasRoute
   AuthenticatedAppPedidosRoute: typeof AuthenticatedAppPedidosRoute
   AuthenticatedAppProdutosRoute: typeof AuthenticatedAppProdutosRoute
   AuthenticatedAppRelatoriosRoute: typeof AuthenticatedAppRelatoriosRoute
@@ -532,6 +553,7 @@ const AuthenticatedAppRouteChildren: AuthenticatedAppRouteChildren = {
   AuthenticatedAppFornecedoresRoute: AuthenticatedAppFornecedoresRoute,
   AuthenticatedAppMarketingRoute: AuthenticatedAppMarketingRoute,
   AuthenticatedAppMetasRoute: AuthenticatedAppMetasRoute,
+  AuthenticatedAppMetricasRoute: AuthenticatedAppMetricasRoute,
   AuthenticatedAppPedidosRoute: AuthenticatedAppPedidosRoute,
   AuthenticatedAppProdutosRoute: AuthenticatedAppProdutosRoute,
   AuthenticatedAppRelatoriosRoute: AuthenticatedAppRelatoriosRoute,
