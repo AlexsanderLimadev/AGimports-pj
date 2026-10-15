@@ -78,13 +78,13 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "AG Imports · ERP & Business Suite" },
+      { title: "AG Tech · ERP & Business Suite" },
       {
         name: "description",
         content:
-          "Plataforma completa de gestão da AG Imports: vendas, estoque, financeiro, marketing, CRM, BI e funis de venda em tempo real.",
+          "Plataforma completa de gestão da AG Tech: vendas, estoque, financeiro, marketing, CRM, BI e funis de venda em tempo real.",
       },
-      { property: "og:title", content: "AG Imports · ERP & Business Suite" },
+      { property: "og:title", content: "AG Tech · ERP & Business Suite" },
       {
         property: "og:description",
         content:
@@ -119,7 +119,7 @@ const THEME_INIT_SCRIPT = `(function(){try{var m=document.cookie.match(/(?:^|;\\
 const SCHEMA_ORG = JSON.stringify({
   "@context": "https://schema.org",
   "@type": "SoftwareApplication",
-  name: "AG Imports",
+  name: "AG Tech",
   applicationCategory: "BusinessApplication",
   operatingSystem: "Web",
   description:

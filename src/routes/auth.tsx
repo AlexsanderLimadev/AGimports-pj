@@ -14,7 +14,7 @@ const searchSchema = z.object({
 });
 
 export const Route = createFileRoute("/auth")({
-  head: () => ({ meta: [{ title: "Entrar · AG Imports" }] }),
+  head: () => ({ meta: [{ title: "Entrar · AG Tech" }] }),
   validateSearch: searchSchema,
   component: AuthPage,
 });
@@ -64,6 +64,20 @@ function AuthPage() {
     });
   }, [navigate, redirectTo]);
 
+  // Traduz as mensagens mais comuns que o Supabase Auth devolve (em inglês,
+  // técnicas) pra algo que a pessoa realmente entende. Se a mensagem não
+  // for uma dessas conhecidas, mostra a original em vez de esconder o erro.
+  function friendlyAuthError(message: string): string {
+    const m = message.toLowerCase();
+    if (m.includes("invalid login credentials")) return "E-mail ou senha incorretos.";
+    if (m.includes("email not confirmed")) return "Confirme seu e-mail antes de entrar. Verifique sua caixa de entrada e o spam.";
+    if (m.includes("user already registered") || m.includes("already registered")) return "Este e-mail já tem conta. Tente entrar em vez de criar uma nova.";
+    if (m.includes("password should be at least")) return "A senha precisa ter pelo menos 8 caracteres.";
+    if (m.includes("rate limit") || m.includes("too many requests")) return "Muitas tentativas seguidas. Aguarde um minuto e tente de novo.";
+    if (m.includes("network") || m.includes("fetch")) return "Não foi possível falar com o servidor. Confira sua internet; se o problema continuar, o banco de dados pode estar indisponível.";
+    return message;
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
@@ -75,7 +89,7 @@ function AuthPage() {
         logAccessFn({ data: { event: "sign_in", userAgent: navigator.userAgent } }).catch(() => {});
         navigate({ to: redirectTo ?? "/app", replace: true });
       } else if (mode === "signup") {
-        const { error } = await supabase.auth.signUp({
+        const { data, error } = await supabase.auth.signUp({
           email,
           password,
           options: {
@@ -84,6 +98,17 @@ function AuthPage() {
           },
         });
         if (error) throw error;
+
+        // Se o Supabase exige confirmação de e-mail, signUp() cria a conta
+        // mas NÃO devolve uma sessão ativa — navegar pro /app nesse caso só
+        // faria a pessoa ser jogada de volta pro login, parecendo que "não
+        // funcionou". Em vez disso, avisa claramente o que fazer.
+        if (!data.session) {
+          toast.success("Conta criada! Verifique seu e-mail para confirmar o acesso.", { duration: 8000 });
+          setMode("signin");
+          return;
+        }
+
         toast.success("Conta criada com sucesso!");
         logAccessFn({ data: { event: "sign_up", userAgent: navigator.userAgent } }).catch(() => {});
         navigate({ to: redirectTo ?? "/app", replace: true });
@@ -96,7 +121,8 @@ function AuthPage() {
         setMode("signin");
       }
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Erro inesperado");
+      const raw = err instanceof Error ? err.message : "Erro inesperado";
+      toast.error(friendlyAuthError(raw));
     } finally {
       setLoading(false);
     }
@@ -112,7 +138,11 @@ function AuthPage() {
       options: { redirectTo: `${window.location.origin}${redirectTo ?? "/app"}` },
     });
     if (error) {
-      toast.error(error.message ?? "Falha ao entrar com Google");
+      const m = error.message.toLowerCase();
+      const friendly = m.includes("provider is not enabled") || m.includes("unsupported provider")
+        ? "Login com Google ainda não foi configurado neste sistema. Use e-mail e senha por enquanto."
+        : friendlyAuthError(error.message);
+      toast.error(friendly);
       setLoading(false);
     }
   }
@@ -150,7 +180,7 @@ function AuthPage() {
           </div>
           <div className="text-center">
             <p className="text-[16px] font-semibold text-white/90" style={{ letterSpacing: "-0.025em" }}>
-              AG Imports
+              AG Tech
             </p>
             <p
               className="text-[9px] text-white/25 tracking-[0.22em] uppercase mt-0.5"

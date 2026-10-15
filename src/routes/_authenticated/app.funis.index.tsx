@@ -21,7 +21,7 @@ const funisOptions = queryOptions({
 });
 
 export const Route = createFileRoute("/_authenticated/app/funis/")({
-  head: () => ({ meta: [{ title: "Funis · AG Imports" }] }),
+  head: () => ({ meta: [{ title: "Funis · AG Tech" }] }),
   loader: ({ context }) => context.queryClient.ensureQueryData(funisOptions),
   component: Funis,
 });

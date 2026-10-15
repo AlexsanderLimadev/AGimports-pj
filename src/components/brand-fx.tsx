@@ -107,7 +107,7 @@ export function SpotCard({ children, className = "" }: { children: ReactNode; cl
 }
 
 /**
- * Logo real da AG Imports (monograma, enviado pelo usuário) — sempre
+ * Logo real da AG Tech (monograma, enviado pelo usuário) — sempre
  * dentro de um chip branco arredondado, pra garantir contraste tanto nas
  * páginas sempre-escuras (login/landing) quanto nos dois temas do app
  * (a arte é preta, então sumiria num fundo escuro sem essa base).
@@ -118,7 +118,7 @@ export function AGLogo({ size = 48, rounded = "rounded-lg" }: { size?: number; r
       className={`flex shrink-0 items-center justify-center bg-white ${rounded}`}
       style={{ width: size, height: size, padding: size * 0.14 }}
     >
-      <img src={logoIcon} alt="AG Imports" className="h-full w-full object-contain" />
+      <img src={logoIcon} alt="AG Tech" className="h-full w-full object-contain" />
     </div>
   );
 }
@@ -130,7 +130,7 @@ export function AGLogoFull({ height = 64 }: { height?: number }) {
       className="inline-flex items-center justify-center rounded-2xl bg-white"
       style={{ height, padding: height * 0.16 }}
     >
-      <img src={logoFull} alt="AG Imports" className="h-full w-auto object-contain" />
+      <img src={logoFull} alt="AG Tech" className="h-full w-auto object-contain" />
     </div>
   );
 }
@@ -152,7 +152,7 @@ export function Brand({ collapsed = false }: { collapsed?: boolean }) {
           className="font-semibold text-white/88"
           style={{ fontSize: 13, letterSpacing: "-0.025em", fontFamily: "Inter, sans-serif" }}
         >
-          AG Imports
+          AG Tech
         </span>
         <span
           className="text-white/28"

@@ -16,7 +16,7 @@ import {
 } from "@/lib/funis.functions";
 
 export const Route = createFileRoute("/_authenticated/app/funis/$id")({
-  head: () => ({ meta: [{ title: `Funil · AG Imports` }] }),
+  head: () => ({ meta: [{ title: `Funil · AG Tech` }] }),
   component: Editor,
 });
 

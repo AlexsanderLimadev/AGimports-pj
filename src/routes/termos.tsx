@@ -3,12 +3,12 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 export const Route = createFileRoute("/termos")({
   head: () => ({
     meta: [
-      { title: "Termos de Uso · AG Imports" },
+      { title: "Termos de Uso · AG Tech" },
       {
         name: "description",
-        content: "Regras de uso da plataforma de gestão AG Imports.",
+        content: "Regras de uso da plataforma de gestão AG Tech.",
       },
-      { property: "og:title", content: "Termos de Uso · AG Imports" },
+      { property: "og:title", content: "Termos de Uso · AG Tech" },
       { property: "og:type", content: "website" },
     ],
   }),
@@ -35,13 +35,13 @@ function Termos() {
         Última atualização: {new Date().toLocaleDateString("pt-BR")}
       </p>
       <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
-        Estes termos regem o uso da plataforma AG Imports. Ao criar uma conta ou acessar o
+        Estes termos regem o uso da plataforma AG Tech. Ao criar uma conta ou acessar o
         sistema, você concorda com o descrito abaixo.
       </p>
 
       <Section title="1. O que é a plataforma">
         <p>
-          A AG Imports é um sistema de gestão (ERP) para operações de venda, estoque, financeiro,
+          A AG Tech é um sistema de gestão (ERP) para operações de venda, estoque, financeiro,
           marketing e relacionamento com clientes, de uso interno da empresa e destinado a
           usuários autorizados por ela.
         </p>
@@ -87,7 +87,7 @@ function Termos() {
         <p>
           A plataforma é fornecida como ferramenta de apoio à gestão. Decisões de negócio tomadas
           com base nos dados e relatórios do sistema são de responsabilidade de quem as toma. A
-          AG Imports não se responsabiliza por perdas decorrentes de uso inadequado, erro de
+          AG Tech não se responsabiliza por perdas decorrentes de uso inadequado, erro de
           digitação de dados, ou decisões comerciais.
         </p>
       </Section>
@@ -109,7 +109,7 @@ function Termos() {
       <Section title="9. Contato">
         <p>
           Dúvidas sobre estes termos podem ser encaminhadas pelos canais oficiais de atendimento
-          da AG Imports.
+          da AG Tech.
         </p>
       </Section>
     </main>

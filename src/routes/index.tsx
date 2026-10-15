@@ -22,13 +22,13 @@ import {
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "AG Imports · ERP para importadores de moda e acessórios" },
+      { title: "AG Tech · ERP para importadores de moda e acessórios" },
       {
         name: "description",
         content:
           "Sistema completo de gestão para importadores: controle de estoque, pedidos, financeiro, CRM e funis de venda em um só lugar, com indicadores em tempo real.",
       },
-      { property: "og:title", content: "AG Imports · ERP para importadores de moda e acessórios" },
+      { property: "og:title", content: "AG Tech · ERP para importadores de moda e acessórios" },
       {
         property: "og:description",
         content:
@@ -58,7 +58,7 @@ function Brand() {
     <div className="flex items-center gap-2.5">
       <AGLogo size={34} />
       <span className="font-semibold text-white/88" style={{ fontSize: 13, letterSpacing: "-0.025em" }}>
-        AG Imports
+        AG Tech
       </span>
     </div>
   );
@@ -415,7 +415,7 @@ function Landing() {
             Sem planilha solta, sem sistema separado pra cada área.
           </h2>
           <p className="mt-2 text-[13px] leading-relaxed text-white/35">
-            O AG Imports substitui as ferramentas soltas do dia a dia por um único lugar,
+            O AG Tech substitui as ferramentas soltas do dia a dia por um único lugar,
             do controle de estoque à decisão de preço, do primeiro contato com o cliente
             ao fechamento do caixa do mês.
           </p>
@@ -450,7 +450,7 @@ function Landing() {
 
 const FAQ_ITEMS: [string, string][] = [
   [
-    "Preciso instalar algo pra usar o AG Imports?",
+    "Preciso instalar algo pra usar o AG Tech?",
     "Não. É 100% web — você acessa pelo navegador, de qualquer computador ou celular, sem instalar nada.",
   ],
   [

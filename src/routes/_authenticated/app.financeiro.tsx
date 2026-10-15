@@ -52,7 +52,7 @@ const lancamentosOptions = queryOptions({
 });
 
 export const Route = createFileRoute("/_authenticated/app/financeiro")({
-  head: () => ({ meta: [{ title: "Financeiro · AG Imports" }] }),
+  head: () => ({ meta: [{ title: "Financeiro · AG Tech" }] }),
   loader: ({ context }) => context.queryClient.ensureQueryData(lancamentosOptions),
   component: Financeiro,
 });

@@ -44,7 +44,7 @@ const suppliersOptions = queryOptions({
 });
 
 export const Route = createFileRoute("/_authenticated/app/fornecedores")({
-  head: () => ({ meta: [{ title: "Fornecedores · AG Imports" }] }),
+  head: () => ({ meta: [{ title: "Fornecedores · AG Tech" }] }),
   loader: ({ context }) => context.queryClient.ensureQueryData(suppliersOptions),
   component: Fornecedores,
 });

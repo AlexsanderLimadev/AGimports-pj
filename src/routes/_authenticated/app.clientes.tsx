@@ -35,9 +35,9 @@ import { csvDate, downloadCsv, toCsv } from "@/lib/csv";
 export const Route = createFileRoute("/_authenticated/app/clientes")({
   head: () => ({
     meta: [
-      { title: "Clientes · AG Imports" },
-      { name: "description", content: "CRM de clientes da AG Imports com busca, exportação e LGPD." },
-      { property: "og:title", content: "Clientes · AG Imports" },
+      { title: "Clientes · AG Tech" },
+      { name: "description", content: "CRM de clientes da AG Tech com busca, exportação e LGPD." },
+      { property: "og:title", content: "Clientes · AG Tech" },
       { property: "og:description", content: "Cadastro, segmentação e privacidade de clientes." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
@@ -238,7 +238,7 @@ function Clientes() {
             icon={<Users className="h-4 w-4" />}
             title={term ? "Nenhum resultado" : "Nenhum cliente cadastrado"}
             description={
-              term ? "Ajuste a busca e tente novamente." : "Cadastre o primeiro cliente da AG Imports."
+              term ? "Ajuste a busca e tente novamente." : "Cadastre o primeiro cliente da AG Tech."
             }
             action={
               !term && (

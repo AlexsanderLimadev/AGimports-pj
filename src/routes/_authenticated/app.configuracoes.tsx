@@ -7,7 +7,7 @@ import { Switch } from "@/components/ui/switch";
 import { listAccessLogs } from "@/lib/access-log.functions";
 
 export const Route = createFileRoute("/_authenticated/app/configuracoes")({
-  head: () => ({ meta: [{ title: "Configurações · AG Imports" }] }),
+  head: () => ({ meta: [{ title: "Configurações · AG Tech" }] }),
   component: Conf,
 });
 

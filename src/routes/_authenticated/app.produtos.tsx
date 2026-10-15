@@ -49,7 +49,7 @@ const categoriesOptions = queryOptions({ queryKey: ["categories"], queryFn: () =
 const suppliersOptions = queryOptions({ queryKey: ["suppliers"], queryFn: () => listSuppliers() });
 
 export const Route = createFileRoute("/_authenticated/app/produtos")({
-  head: () => ({ meta: [{ title: "Produtos · AG Imports" }] }),
+  head: () => ({ meta: [{ title: "Produtos · AG Tech" }] }),
   loader: async ({ context }) => {
     await Promise.all([
       context.queryClient.ensureQueryData(productsOptions),

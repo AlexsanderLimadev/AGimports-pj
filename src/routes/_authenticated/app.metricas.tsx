@@ -11,7 +11,7 @@ const metricasOptions = queryOptions({
 });
 
 export const Route = createFileRoute("/_authenticated/app/metricas")({
-  head: () => ({ meta: [{ title: "Métricas de Negócio · AG Imports" }] }),
+  head: () => ({ meta: [{ title: "Métricas de Negócio · AG Tech" }] }),
   loader: ({ context }) => context.queryClient.ensureQueryData(metricasOptions),
   component: Metricas,
 });

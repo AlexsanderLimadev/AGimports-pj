@@ -46,7 +46,7 @@ const campanhasOptions = queryOptions({
 });
 
 export const Route = createFileRoute("/_authenticated/app/marketing")({
-  head: () => ({ meta: [{ title: "Marketing · AG Imports" }] }),
+  head: () => ({ meta: [{ title: "Marketing · AG Tech" }] }),
   loader: ({ context }) => context.queryClient.ensureQueryData(campanhasOptions),
   component: Marketing,
 });

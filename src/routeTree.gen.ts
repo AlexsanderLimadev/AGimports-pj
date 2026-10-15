@@ -23,6 +23,7 @@ import { Route as AuthenticatedAppBiRouteImport } from './routes/_authenticated/
 import { Route as AuthenticatedAppCalculadoraRouteImport } from './routes/_authenticated/app.calculadora'
 import { Route as AuthenticatedAppClientesRouteImport } from './routes/_authenticated/app.clientes'
 import { Route as AuthenticatedAppConfiguracoesRouteImport } from './routes/_authenticated/app.configuracoes'
+import { Route as AuthenticatedAppDashboardAnaliticoRouteImport } from './routes/_authenticated/app.dashboard-analitico'
 import { Route as AuthenticatedAppEstoqueRouteImport } from './routes/_authenticated/app.estoque'
 import { Route as AuthenticatedAppFinanceiroRouteImport } from './routes/_authenticated/app.financeiro'
 import { Route as AuthenticatedAppFornecedoresRouteImport } from './routes/_authenticated/app.fornecedores'
@@ -108,6 +109,12 @@ const AuthenticatedAppConfiguracoesRoute =
     path: '/configuracoes',
     getParentRoute: () => AuthenticatedAppRoute,
   } as any)
+const AuthenticatedAppDashboardAnaliticoRoute =
+  AuthenticatedAppDashboardAnaliticoRouteImport.update({
+    id: '/dashboard-analitico',
+    path: '/dashboard-analitico',
+    getParentRoute: () => AuthenticatedAppRoute,
+  } as any)
 const AuthenticatedAppEstoqueRoute = AuthenticatedAppEstoqueRouteImport.update({
   id: '/estoque',
   path: '/estoque',
@@ -184,6 +191,7 @@ export interface FileRoutesByFullPath {
   '/app/calculadora': typeof AuthenticatedAppCalculadoraRoute
   '/app/clientes': typeof AuthenticatedAppClientesRoute
   '/app/configuracoes': typeof AuthenticatedAppConfiguracoesRoute
+  '/app/dashboard-analitico': typeof AuthenticatedAppDashboardAnaliticoRoute
   '/app/estoque': typeof AuthenticatedAppEstoqueRoute
   '/app/financeiro': typeof AuthenticatedAppFinanceiroRoute
   '/app/fornecedores': typeof AuthenticatedAppFornecedoresRoute
@@ -209,6 +217,7 @@ export interface FileRoutesByTo {
   '/app/calculadora': typeof AuthenticatedAppCalculadoraRoute
   '/app/clientes': typeof AuthenticatedAppClientesRoute
   '/app/configuracoes': typeof AuthenticatedAppConfiguracoesRoute
+  '/app/dashboard-analitico': typeof AuthenticatedAppDashboardAnaliticoRoute
   '/app/estoque': typeof AuthenticatedAppEstoqueRoute
   '/app/financeiro': typeof AuthenticatedAppFinanceiroRoute
   '/app/fornecedores': typeof AuthenticatedAppFornecedoresRoute
@@ -237,6 +246,7 @@ export interface FileRoutesById {
   '/_authenticated/app/calculadora': typeof AuthenticatedAppCalculadoraRoute
   '/_authenticated/app/clientes': typeof AuthenticatedAppClientesRoute
   '/_authenticated/app/configuracoes': typeof AuthenticatedAppConfiguracoesRoute
+  '/_authenticated/app/dashboard-analitico': typeof AuthenticatedAppDashboardAnaliticoRoute
   '/_authenticated/app/estoque': typeof AuthenticatedAppEstoqueRoute
   '/_authenticated/app/financeiro': typeof AuthenticatedAppFinanceiroRoute
   '/_authenticated/app/fornecedores': typeof AuthenticatedAppFornecedoresRoute
@@ -265,6 +275,7 @@ export interface FileRouteTypes {
     | '/app/calculadora'
     | '/app/clientes'
     | '/app/configuracoes'
+    | '/app/dashboard-analitico'
     | '/app/estoque'
     | '/app/financeiro'
     | '/app/fornecedores'
@@ -290,6 +301,7 @@ export interface FileRouteTypes {
     | '/app/calculadora'
     | '/app/clientes'
     | '/app/configuracoes'
+    | '/app/dashboard-analitico'
     | '/app/estoque'
     | '/app/financeiro'
     | '/app/fornecedores'
@@ -317,6 +329,7 @@ export interface FileRouteTypes {
     | '/_authenticated/app/calculadora'
     | '/_authenticated/app/clientes'
     | '/_authenticated/app/configuracoes'
+    | '/_authenticated/app/dashboard-analitico'
     | '/_authenticated/app/estoque'
     | '/_authenticated/app/financeiro'
     | '/_authenticated/app/fornecedores'
@@ -440,6 +453,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppConfiguracoesRouteImport
       parentRoute: typeof AuthenticatedAppRoute
     }
+    '/_authenticated/app/dashboard-analitico': {
+      id: '/_authenticated/app/dashboard-analitico'
+      path: '/dashboard-analitico'
+      fullPath: '/app/dashboard-analitico'
+      preLoaderRoute: typeof AuthenticatedAppDashboardAnaliticoRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
     '/_authenticated/app/estoque': {
       id: '/_authenticated/app/estoque'
       path: '/estoque'
@@ -527,6 +547,7 @@ interface AuthenticatedAppRouteChildren {
   AuthenticatedAppCalculadoraRoute: typeof AuthenticatedAppCalculadoraRoute
   AuthenticatedAppClientesRoute: typeof AuthenticatedAppClientesRoute
   AuthenticatedAppConfiguracoesRoute: typeof AuthenticatedAppConfiguracoesRoute
+  AuthenticatedAppDashboardAnaliticoRoute: typeof AuthenticatedAppDashboardAnaliticoRoute
   AuthenticatedAppEstoqueRoute: typeof AuthenticatedAppEstoqueRoute
   AuthenticatedAppFinanceiroRoute: typeof AuthenticatedAppFinanceiroRoute
   AuthenticatedAppFornecedoresRoute: typeof AuthenticatedAppFornecedoresRoute
@@ -548,6 +569,8 @@ const AuthenticatedAppRouteChildren: AuthenticatedAppRouteChildren = {
   AuthenticatedAppCalculadoraRoute: AuthenticatedAppCalculadoraRoute,
   AuthenticatedAppClientesRoute: AuthenticatedAppClientesRoute,
   AuthenticatedAppConfiguracoesRoute: AuthenticatedAppConfiguracoesRoute,
+  AuthenticatedAppDashboardAnaliticoRoute:
+    AuthenticatedAppDashboardAnaliticoRoute,
   AuthenticatedAppEstoqueRoute: AuthenticatedAppEstoqueRoute,
   AuthenticatedAppFinanceiroRoute: AuthenticatedAppFinanceiroRoute,
   AuthenticatedAppFornecedoresRoute: AuthenticatedAppFornecedoresRoute,

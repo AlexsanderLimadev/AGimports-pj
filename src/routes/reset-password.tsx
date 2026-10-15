@@ -6,7 +6,7 @@ import { Loader2 } from "lucide-react";
 import { AGLogo, Grain, Grid, useMouseRel } from "@/components/brand-fx";
 
 export const Route = createFileRoute("/reset-password")({
-  head: () => ({ meta: [{ title: "Nova senha · AG Imports" }] }),
+  head: () => ({ meta: [{ title: "Nova senha · AG Tech" }] }),
   component: ResetPassword,
 });
 
@@ -75,7 +75,7 @@ function ResetPassword() {
         <div className="anim-down mb-8 flex flex-col items-center gap-3">
           <AGLogo size={56} />
           <p className="text-[15px] font-semibold text-white/90" style={{ letterSpacing: "-0.025em" }}>
-            AG Imports
+            AG Tech
           </p>
         </div>
 

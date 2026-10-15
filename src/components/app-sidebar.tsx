@@ -70,6 +70,7 @@ const groups: { label: string; items: { title: string; url: string; icon: any }[
       { title: "Marketing", url: "/app/marketing", icon: Megaphone },
       { title: "Automações", url: "/app/automacoes", icon: Zap },
       { title: "Métricas de Negócio", url: "/app/metricas", icon: TrendingUp },
+      { title: "Dashboard Analítico", url: "/app/dashboard-analitico", icon: BarChart3 },
     ],
   },
   {
@@ -95,7 +96,7 @@ export function AppSidebar() {
             <AGLogo size={22} rounded="rounded-md" />
           </div>
           <div className="min-w-0 group-data-[collapsible=icon]:hidden">
-            <div className="truncate text-sm font-semibold tracking-tight">AG Imports</div>
+            <div className="truncate text-sm font-semibold tracking-tight">AG Tech</div>
             <div className="truncate text-[11px] text-muted-foreground">ERP · Business Suite</div>
           </div>
         </div>

@@ -12,7 +12,7 @@ import {
 } from "@/lib/calculadora.functions";
 
 export const Route = createFileRoute("/_authenticated/app/calculadora")({
-  head: () => ({ meta: [{ title: "Calculadora · AG Imports" }] }),
+  head: () => ({ meta: [{ title: "Calculadora · AG Tech" }] }),
   loader: ({ context }) => context.queryClient.ensureQueryData(historicoOptions),
   component: Calc,
 });

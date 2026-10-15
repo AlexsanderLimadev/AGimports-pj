@@ -37,7 +37,7 @@ const automacoesOptions = queryOptions({
 });
 
 export const Route = createFileRoute("/_authenticated/app/automacoes")({
-  head: () => ({ meta: [{ title: "Automações · AG Imports" }] }),
+  head: () => ({ meta: [{ title: "Automações · AG Tech" }] }),
   loader: ({ context }) => context.queryClient.ensureQueryData(automacoesOptions),
   component: Auto,
 });

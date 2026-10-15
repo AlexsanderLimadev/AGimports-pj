@@ -17,7 +17,7 @@ const statsOptions = queryOptions({
 });
 
 export const Route = createFileRoute("/_authenticated/app/")({
-  head: () => ({ meta: [{ title: "Dashboard · AG Imports" }] }),
+  head: () => ({ meta: [{ title: "Dashboard · AG Tech" }] }),
   loader: ({ context }) => context.queryClient.ensureQueryData(statsOptions),
   component: Dashboard,
   errorComponent: ({ error }) => (
@@ -67,7 +67,7 @@ function OnboardingChecklist({ hasProducts }: { hasProducts: boolean }) {
         <div>
           <div className="flex items-center gap-2 text-sm font-medium">
             <PartyPopper className="h-4 w-4 text-primary" />
-            {firstVisit ? "Seja bem-vindo(a) à AG Imports!" : "Vamos começar"}
+            {firstVisit ? "Seja bem-vindo(a) à AG Tech!" : "Vamos começar"}
           </div>
           <p className="mt-1 text-xs text-muted-foreground">
             Alguns passos rápidos pra deixar seu painel pronto pra uso:

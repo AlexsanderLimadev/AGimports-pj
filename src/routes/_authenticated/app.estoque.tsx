@@ -18,7 +18,7 @@ const productsOptions = queryOptions({ queryKey: ["products"], queryFn: () => li
 const movementsOptions = queryOptions({ queryKey: ["movements"], queryFn: () => listMovements() });
 
 export const Route = createFileRoute("/_authenticated/app/estoque")({
-  head: () => ({ meta: [{ title: "Estoque · AG Imports" }] }),
+  head: () => ({ meta: [{ title: "Estoque · AG Tech" }] }),
   loader: async ({ context }) => {
     await Promise.all([
       context.queryClient.ensureQueryData(productsOptions),

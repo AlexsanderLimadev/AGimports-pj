@@ -8,7 +8,7 @@ const FALLOFF_CURVES: Record<string, (p: number) => number> = {
 
 /**
  * Efeito de "proximidade do cursor" — adaptado do componente LineSidebar
- * (React Bits) pro menu lateral do AG Imports, que tem ícone + grupos +
+ * (React Bits) pro menu lateral do AG Tech, que tem ícone + grupos +
  * modo colapsado (o componente original assume uma lista simples, sem
  * essas partes, então não dava pra só "colar" ele aqui).
  *

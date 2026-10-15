@@ -10,7 +10,7 @@ import { listLancamentos } from "@/lib/financeiro.functions";
 import { listClientes } from "@/lib/clientes.functions";
 
 export const Route = createFileRoute("/_authenticated/app/relatorios")({
-  head: () => ({ meta: [{ title: "Relatórios · AG Imports" }] }),
+  head: () => ({ meta: [{ title: "Relatórios · AG Tech" }] }),
   component: Rel,
 });
 

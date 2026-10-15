@@ -23,7 +23,7 @@ export const listPedidos = createServerFn({ method: "GET" })
     const { data, error } = await context.supabase
       .from("pedidos")
       .select(
-        "id, numero, cliente_id, cliente_nome_snapshot, status, canal, total_cents, notes, created_at, clientes(nome)",
+        "id, numero, cliente_id, cliente_nome_snapshot, vendedor_nome, status, canal, total_cents, notes, created_at, clientes(nome)",
       )
       .is("deleted_at", null)
       .order("created_at", { ascending: false })
@@ -59,6 +59,7 @@ export const createPedido = createServerFn({ method: "POST" })
         status: z.enum(PEDIDO_STATUS).default("novo"),
         canal: z.enum(PEDIDO_CANAL).default("site"),
         notes: z.string().max(2000).optional().nullable(),
+        vendedor_nome: z.string().trim().max(120).optional().nullable(),
         itens: z.array(itemSchema).min(1),
       })
       .parse(d),
@@ -97,6 +98,7 @@ export const createPedido = createServerFn({ method: "POST" })
           status: data.status,
           canal: data.canal,
           notes: data.notes ?? null,
+          vendedor_nome: data.vendedor_nome || null,
           total_cents,
         })
         .select("id, numero")

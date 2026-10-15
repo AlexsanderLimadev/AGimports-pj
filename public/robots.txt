@@ -3,4 +3,4 @@ Allow: /
 Disallow: /app
 Disallow: /reset-password
 
-Sitemap: https://agimports.app/sitemap.xml
+Sitemap: https://agtech.app/sitemap.xml

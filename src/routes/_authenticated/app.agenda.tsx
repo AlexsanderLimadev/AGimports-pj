@@ -30,7 +30,7 @@ import {
 } from "@/lib/agenda.functions";
 
 export const Route = createFileRoute("/_authenticated/app/agenda")({
-  head: () => ({ meta: [{ title: "Agenda · AG Imports" }] }),
+  head: () => ({ meta: [{ title: "Agenda · AG Tech" }] }),
   loader: ({ context }) => {
     const d = new Date();
     const from = new Date(d.getFullYear(), d.getMonth(), 1).toISOString();

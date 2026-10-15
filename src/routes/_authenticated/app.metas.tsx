@@ -49,7 +49,7 @@ const metasOptions = queryOptions({
 });
 
 export const Route = createFileRoute("/_authenticated/app/metas")({
-  head: () => ({ meta: [{ title: "Metas · AG Imports" }] }),
+  head: () => ({ meta: [{ title: "Metas · AG Tech" }] }),
   loader: ({ context }) => context.queryClient.ensureQueryData(metasOptions),
   component: Metas,
 });

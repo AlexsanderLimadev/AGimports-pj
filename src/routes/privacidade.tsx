@@ -3,17 +3,17 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 export const Route = createFileRoute("/privacidade")({
   head: () => ({
     meta: [
-      { title: "Política de Privacidade · AG Imports" },
+      { title: "Política de Privacidade · AG Tech" },
       {
         name: "description",
         content:
-          "Como a AG Imports coleta, usa, armazena e elimina dados pessoais, e como exercer seus direitos previstos na LGPD.",
+          "Como a AG Tech coleta, usa, armazena e elimina dados pessoais, e como exercer seus direitos previstos na LGPD.",
       },
-      { property: "og:title", content: "Política de Privacidade · AG Imports" },
+      { property: "og:title", content: "Política de Privacidade · AG Tech" },
       {
         property: "og:description",
         content:
-          "Transparência sobre tratamento de dados pessoais na plataforma de gestão da AG Imports.",
+          "Transparência sobre tratamento de dados pessoais na plataforma de gestão da AG Tech.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
@@ -44,14 +44,14 @@ function Privacidade() {
         Última atualização: {new Date().toLocaleDateString("pt-BR")}
       </p>
       <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
-        Esta página é mantida pela AG Imports para explicar, de forma direta, como a plataforma
+        Esta página é mantida pela AG Tech para explicar, de forma direta, como a plataforma
         interna de gestão trata dados pessoais. Não constitui certificação nem auditoria
         independente.
       </p>
 
       <Section title="1. Quem é o controlador">
         <p>
-          A AG Imports é a controladora dos dados tratados nesta plataforma. O sistema é de uso
+          A AG Tech é a controladora dos dados tratados nesta plataforma. O sistema é de uso
           interno da empresa, para gestão de produtos, clientes, pedidos, financeiro e marketing.
         </p>
       </Section>
@@ -113,7 +113,7 @@ function Privacidade() {
       <Section title="8. Contato">
         <p>
           Solicitações relacionadas a dados pessoais devem ser encaminhadas ao responsável pela
-          AG Imports pelos canais oficiais de atendimento da empresa. Respondemos em até 15 dias.
+          AG Tech pelos canais oficiais de atendimento da empresa. Respondemos em até 15 dias.
         </p>
       </Section>
     </main>

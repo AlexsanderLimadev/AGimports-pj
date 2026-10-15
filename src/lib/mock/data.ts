@@ -1,4 +1,4 @@
-// Deterministic mock data for AG Imports ERP
+// Deterministic mock data for AG Tech ERP
 function mulberry32(seed: number) {
   return function () {
     let t = (seed += 0x6d2b79f5);

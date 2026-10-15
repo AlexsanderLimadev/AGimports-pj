@@ -49,7 +49,7 @@ const pedidosOptions = queryOptions({
 });
 
 export const Route = createFileRoute("/_authenticated/app/pedidos")({
-  head: () => ({ meta: [{ title: "Pedidos · AG Imports" }] }),
+  head: () => ({ meta: [{ title: "Pedidos · AG Tech" }] }),
   loader: ({ context }) => context.queryClient.ensureQueryData(pedidosOptions),
   component: Pedidos,
 });
@@ -62,6 +62,7 @@ function Pedidos() {
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({
     cliente: "",
+    vendedor: "",
     descricao: "",
     qty: 1,
     unit: 0,
@@ -74,6 +75,7 @@ function Pedidos() {
       createPedido({
         data: {
           cliente_nome_snapshot: form.cliente.trim(),
+          vendedor_nome: form.vendedor.trim() || null,
           status: form.status,
           canal: form.canal,
           itens: [
@@ -88,7 +90,7 @@ function Pedidos() {
     onSuccess: () => {
       toast.success("Pedido criado");
       setOpen(false);
-      setForm({ cliente: "", descricao: "", qty: 1, unit: 0, canal: "site", status: "novo" });
+      setForm({ cliente: "", vendedor: "", descricao: "", qty: 1, unit: 0, canal: "site", status: "novo" });
       invalidate();
     },
     onError: (e: Error) => toast.error(e.message),
@@ -143,6 +145,10 @@ function Pedidos() {
                 <div className="grid gap-1.5">
                   <Label>Cliente</Label>
                   <Input value={form.cliente} onChange={(e) => setForm({ ...form, cliente: e.target.value })} placeholder="Nome do cliente" />
+                </div>
+                <div className="grid gap-1.5">
+                  <Label>Vendedor</Label>
+                  <Input value={form.vendedor} onChange={(e) => setForm({ ...form, vendedor: e.target.value })} placeholder="Quem fez a venda (opcional)" />
                 </div>
                 <div className="grid gap-1.5">
                   <Label>Descrição do item</Label>

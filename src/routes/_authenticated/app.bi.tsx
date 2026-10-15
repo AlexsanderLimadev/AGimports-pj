@@ -14,7 +14,7 @@ const biOptions = queryOptions({
 });
 
 export const Route = createFileRoute("/_authenticated/app/bi")({
-  head: () => ({ meta: [{ title: "BI · AG Imports" }] }),
+  head: () => ({ meta: [{ title: "BI · AG Tech" }] }),
   loader: ({ context }) => context.queryClient.ensureQueryData(biOptions),
   component: BI,
 });
