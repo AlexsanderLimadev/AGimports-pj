@@ -32,3 +32,6 @@ dist-ssr
 *.sw?
 .env
 .env.*
+
+# Backups locais (contêm dados reais)
+backups/
