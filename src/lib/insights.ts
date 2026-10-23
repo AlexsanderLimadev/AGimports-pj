@@ -1,4 +1,4 @@
-import type { AnaliseNegocio } from "@/lib/analise.functions";
+import type { AnaliseNegocio } from "@/lib/analise-calc";
 
 export type Insight = {
   tipo: "alerta" | "oportunidade" | "positivo";
