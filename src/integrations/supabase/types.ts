@@ -573,6 +573,7 @@ export type Database = {
           total_cents: number
           updated_at: string
           user_id: string
+          vendedor_id: string | null
           vendedor_nome: string | null
         }
         Insert: {
@@ -588,6 +589,7 @@ export type Database = {
           total_cents?: number
           updated_at?: string
           user_id: string
+          vendedor_id?: string | null
           vendedor_nome?: string | null
         }
         Update: {
@@ -603,6 +605,7 @@ export type Database = {
           total_cents?: number
           updated_at?: string
           user_id?: string
+          vendedor_id?: string | null
           vendedor_nome?: string | null
         }
         Relationships: [
@@ -858,6 +861,36 @@ export type Database = {
           prioridade?: Database["public"]["Enums"]["tarefa_prioridade"]
           status?: Database["public"]["Enums"]["tarefa_status"]
           titulo?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      vendedores: {
+        Row: {
+          ativo: boolean
+          created_at: string
+          deleted_at: string | null
+          id: string
+          nome: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          ativo?: boolean
+          created_at?: string
+          deleted_at?: string | null
+          id?: string
+          nome: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          ativo?: boolean
+          created_at?: string
+          deleted_at?: string | null
+          id?: string
+          nome?: string
           updated_at?: string
           user_id?: string
         }

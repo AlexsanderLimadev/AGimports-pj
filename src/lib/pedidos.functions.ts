@@ -59,6 +59,7 @@ export const createPedido = createServerFn({ method: "POST" })
         status: z.enum(PEDIDO_STATUS).default("novo"),
         canal: z.enum(PEDIDO_CANAL).default("site"),
         notes: z.string().max(2000).optional().nullable(),
+        vendedor_id: z.string().uuid().optional().nullable(),
         vendedor_nome: z.string().trim().max(120).optional().nullable(),
         itens: z.array(itemSchema).min(1),
       })
@@ -88,6 +89,21 @@ export const createPedido = createServerFn({ method: "POST" })
       const resolvedItens = resolveItens(data.itens, priceMap);
       const total_cents = totalCents(resolvedItens);
 
+      // Vendedor escolhido na lista: o nome oficial vem do cadastro, nunca do payload.
+      let vendedorNome: string | null = data.vendedor_nome || null;
+      if (data.vendedor_id) {
+        const { data: vend, error: vErr } = await context.supabase
+          .from("vendedores")
+          .select("nome")
+          .eq("id", data.vendedor_id)
+          .eq("user_id", context.userId)
+          .is("deleted_at", null)
+          .maybeSingle();
+        if (vErr) throw new Error(vErr.message);
+        if (!vend) throw new Error("Vendedor não encontrado. Atualize a página e tente de novo.");
+        vendedorNome = vend.nome;
+      }
+
       const { data: pedido, error } = await context.supabase
         .from("pedidos")
         .insert({
@@ -98,7 +114,10 @@ export const createPedido = createServerFn({ method: "POST" })
           status: data.status,
           canal: data.canal,
           notes: data.notes ?? null,
-          vendedor_nome: data.vendedor_nome || null,
+          // vendedor_id só vai quando escolhido: assim criar pedido sem vendedor
+          // continua funcionando mesmo antes de rodar o SQL dos vendedores.
+          ...(data.vendedor_id ? { vendedor_id: data.vendedor_id } : {}),
+          vendedor_nome: vendedorNome,
           total_cents,
         })
         .select("id, numero")
