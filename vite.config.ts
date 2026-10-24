@@ -7,18 +7,18 @@ import viteTsConfigPaths from "vite-tsconfig-paths";
 
 // Configuração própria, sem o wrapper @lovable.dev/vite-tanstack-config.
 //
-// Preset "node-server": roda em qualquer lugar com Node.js. Pra trocar de
-// hospedagem depois, é só mudar essa string:
-//   - Vercel        -> preset: "vercel"
+// Preset do Nitro: "vercel" quando o build roda na Vercel (ela define a variável
+// VERCEL), e "node-server" em qualquer outro lugar, inclusive no seu computador.
+// Pra trocar de hospedagem depois, é só mudar aqui:
 //   - Cloudflare    -> preset: "cloudflare-module"
-//   - Node genérico -> preset: "node-server" (atual)
+//   - Node genérico -> preset: "node-server"
 // https://nitro.build/deploy
 export default defineConfig({
   plugins: [
     viteTsConfigPaths({ projects: ["./tsconfig.json"] }),
     tailwindcss(),
     tanstackStart(),
-    nitro({ preset: "node-server" }),
+    nitro({ preset: process.env.VERCEL ? "vercel" : "node-server" }),
     viteReact(),
   ],
   resolve: {
