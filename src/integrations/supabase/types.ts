@@ -233,6 +233,27 @@ export type Database = {
         }
         Relationships: []
       }
+      config_negocio: {
+        Row: {
+          dias_estoque_parado: number
+          margem_minima_pct: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          dias_estoque_parado?: number
+          margem_minima_pct?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          dias_estoque_parado?: number
+          margem_minima_pct?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       eventos: {
         Row: {
           all_day: boolean
@@ -552,6 +573,7 @@ export type Database = {
           total_cents: number
           updated_at: string
           user_id: string
+          vendedor_nome: string | null
         }
         Insert: {
           canal?: Database["public"]["Enums"]["pedido_canal"]
@@ -566,6 +588,7 @@ export type Database = {
           total_cents?: number
           updated_at?: string
           user_id: string
+          vendedor_nome?: string | null
         }
         Update: {
           canal?: Database["public"]["Enums"]["pedido_canal"]
@@ -580,6 +603,7 @@ export type Database = {
           total_cents?: number
           updated_at?: string
           user_id?: string
+          vendedor_nome?: string | null
         }
         Relationships: [
           {
@@ -765,6 +789,7 @@ export type Database = {
           deleted_at: string | null
           email: string | null
           id: string
+          is_international: boolean
           name: string
           notes: string | null
           phone: string | null
@@ -777,6 +802,7 @@ export type Database = {
           deleted_at?: string | null
           email?: string | null
           id?: string
+          is_international?: boolean
           name: string
           notes?: string | null
           phone?: string | null
@@ -789,6 +815,7 @@ export type Database = {
           deleted_at?: string | null
           email?: string | null
           id?: string
+          is_international?: boolean
           name?: string
           notes?: string | null
           phone?: string | null

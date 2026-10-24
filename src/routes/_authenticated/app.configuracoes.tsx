@@ -5,6 +5,7 @@ import { PageHeader, SectionCard } from "@/components/ui-bits";
 import { Shield, Users, ScrollText, Lock } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { listAccessLogs } from "@/lib/access-log.functions";
+import { AlertasConfig } from "@/components/alertas-config";
 
 export const Route = createFileRoute("/_authenticated/app/configuracoes")({
   head: () => ({ meta: [{ title: "Configurações · AG Tech" }] }),
@@ -38,6 +39,10 @@ function Conf() {
   return (
     <>
       <PageHeader title="Configurações" description="Segurança, equipe e conformidade" />
+
+      <div className="mb-4">
+        <AlertasConfig />
+      </div>
 
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <SectionCard title="Segurança" description="Padrão empresarial">

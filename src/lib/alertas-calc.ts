@@ -4,6 +4,28 @@ export const MARGEM_MINIMA_PADRAO = 20; // em %
 export const DIAS_ESTOQUE_PARADO_PADRAO = 60;
 const DIA_MS = 86_400_000;
 
+export type ConfigAlertas = { margemMinimaPct: number; diasEstoqueParado: number };
+
+export const CONFIG_ALERTAS_PADRAO: ConfigAlertas = {
+  margemMinimaPct: MARGEM_MINIMA_PADRAO,
+  diasEstoqueParado: DIAS_ESTOQUE_PARADO_PADRAO,
+};
+
+/**
+ * Aceita o que veio do banco ou do formulário e devolve valores válidos.
+ * O que for inválido (vazio, texto, fora da faixa) volta ao padrão em vez de quebrar os alertas.
+ */
+export function normalizarConfig(bruto: { margemMinimaPct?: unknown; diasEstoqueParado?: unknown } | null | undefined): ConfigAlertas {
+  const m = Number(bruto?.margemMinimaPct);
+  const d = Number(bruto?.diasEstoqueParado);
+  const margemOk = bruto?.margemMinimaPct !== null && bruto?.margemMinimaPct !== "" && Number.isFinite(m) && m >= 0 && m <= 100;
+  const diasOk = bruto?.diasEstoqueParado !== null && bruto?.diasEstoqueParado !== "" && Number.isInteger(d) && d >= 1 && d <= 3650;
+  return {
+    margemMinimaPct: margemOk ? Math.round(m * 100) / 100 : MARGEM_MINIMA_PADRAO,
+    diasEstoqueParado: diasOk ? d : DIAS_ESTOQUE_PARADO_PADRAO,
+  };
+}
+
 export type ProdutoAlerta = {
   id: string;
   name: string;
