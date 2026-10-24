@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { calcularAlertas, margemPct, type ProdutoAlerta } from "@/lib/alertas-calc";
+import { calcularAlertas, margemPct, normalizarConfig, type ProdutoAlerta } from "@/lib/alertas-calc";
 
 const AGORA = new Date("2026-10-23T12:00:00Z");
 const diasAtras = (n: number) => new Date(AGORA.getTime() - n * 86_400_000).toISOString();
@@ -119,5 +119,22 @@ describe("total", () => {
   it("sem produtos não há nenhum alerta", () => {
     const r = calcularAlertas([], new Map(), AGORA);
     expect(r.total).toBe(0);
+  });
+});
+
+describe("normalizarConfig", () => {
+  it("sem dado volta aos padrões", () => {
+    expect(normalizarConfig(null)).toEqual({ margemMinimaPct: 20, diasEstoqueParado: 60 });
+    expect(normalizarConfig({})).toEqual({ margemMinimaPct: 20, diasEstoqueParado: 60 });
+  });
+  it("aceita valores válidos, inclusive zero de margem", () => {
+    expect(normalizarConfig({ margemMinimaPct: 0, diasEstoqueParado: 30 })).toEqual({ margemMinimaPct: 0, diasEstoqueParado: 30 });
+    expect(normalizarConfig({ margemMinimaPct: "35.5", diasEstoqueParado: "90" })).toEqual({ margemMinimaPct: 35.5, diasEstoqueParado: 90 });
+  });
+  it("valores inválidos voltam ao padrão em vez de quebrar", () => {
+    expect(normalizarConfig({ margemMinimaPct: -5, diasEstoqueParado: 0 })).toEqual({ margemMinimaPct: 20, diasEstoqueParado: 60 });
+    expect(normalizarConfig({ margemMinimaPct: 150, diasEstoqueParado: 99999 })).toEqual({ margemMinimaPct: 20, diasEstoqueParado: 60 });
+    expect(normalizarConfig({ margemMinimaPct: "abc", diasEstoqueParado: 1.5 })).toEqual({ margemMinimaPct: 20, diasEstoqueParado: 60 });
+    expect(normalizarConfig({ margemMinimaPct: "", diasEstoqueParado: null })).toEqual({ margemMinimaPct: 20, diasEstoqueParado: 60 });
   });
 });

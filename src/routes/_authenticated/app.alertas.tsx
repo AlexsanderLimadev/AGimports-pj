@@ -110,7 +110,8 @@ function Alertas() {
 
       <p className="mt-2 flex items-center gap-1.5 text-xs text-muted-foreground">
         <BellRing className="h-3.5 w-3.5" />
-        Os limites atuais são margem mínima de {a.margemMinimaPct}% e {a.diasParado} dias sem venda. Ajuste o custo e o estoque mínimo em{" "}
+        Limites atuais: margem mínima de {a.margemMinimaPct}% e {a.diasParado} dias sem venda. Mude em{" "}
+        <Link to="/app/configuracoes" className="underline underline-offset-2">Configurações</Link>; custo e estoque mínimo ficam em{" "}
         <Link to="/app/produtos" className="underline underline-offset-2">Produtos</Link>.
       </p>
     </>
