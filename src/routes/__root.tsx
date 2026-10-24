@@ -7,7 +7,7 @@ import {
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
-import { useEffect, type ReactNode } from "react";
+import { useEffect, useRef, type ReactNode } from "react";
 import { Toaster } from "@/components/ui/sonner";
 import { CookieConsent } from "@/components/cookie-consent";
 import { supabase } from "@/integrations/supabase/client";
@@ -163,9 +163,16 @@ function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   const router = useRouter();
 
+  const ultimoUsuario = useRef<string | null | undefined>(undefined);
+
   useEffect(() => {
-    const { data } = supabase.auth.onAuthStateChange((event) => {
+    const { data } = supabase.auth.onAuthStateChange((event, session) => {
       if (event !== "SIGNED_IN" && event !== "SIGNED_OUT" && event !== "USER_UPDATED") return;
+      // O SIGNED_IN também dispara ao voltar para a aba. Sem este filtro, cada
+      // volta recarregava todos os dados da tela à toa.
+      const id = session?.user.id ?? null;
+      if (event !== "USER_UPDATED" && ultimoUsuario.current === id) return;
+      ultimoUsuario.current = id;
       router.invalidate();
       if (event !== "SIGNED_OUT") queryClient.invalidateQueries();
     });

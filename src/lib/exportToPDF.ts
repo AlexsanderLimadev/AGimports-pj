@@ -1,11 +1,10 @@
-import html2canvas from "html2canvas";
-import { jsPDF } from "jspdf";
-
 /**
  * Captura um elemento do DOM e salva como PDF A4 (retrato), com
  * paginação automática quando o conteúdo passa de uma página.
  */
 export async function exportElementToPDF(element: HTMLElement, filename: string): Promise<void> {
+  // Carrega as bibliotecas pesadas só quando alguém clica em exportar.
+  const [{ default: html2canvas }, { jsPDF }] = await Promise.all([import("html2canvas"), import("jspdf")]);
   const canvas = await html2canvas(element, {
     scale: 2,
     backgroundColor: "#ffffff",

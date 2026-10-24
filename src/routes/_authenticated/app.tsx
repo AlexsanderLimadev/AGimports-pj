@@ -36,7 +36,7 @@ function AppLayout() {
   const [alerts, setAlerts] = useState<{ lowStock: number; vencidos: number }>({ lowStock: 0, vencidos: 0 });
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => setEmail(data.user?.email ?? ""));
+    supabase.auth.getSession().then(({ data }) => setEmail(data.session?.user.email ?? ""));
   }, []);
 
   // Central de alertas: dado real, nada de notificação externa (WhatsApp
