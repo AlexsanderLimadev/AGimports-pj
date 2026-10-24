@@ -20,6 +20,7 @@ export const APP_SEARCH_ROUTES: SearchRoute[] = [
   { path: "/app/metas", label: "Metas", keywords: ["meta", "metas", "objetivo", "objetivos"] },
   { path: "/app/metricas", label: "Métricas de Negócio", keywords: ["metrica", "metricas", "cac", "ltv", "roi", "roas", "churn", "arpu", "indicador de negocio"] },
   { path: "/app/dashboard-analitico", label: "Dashboard Analítico", keywords: ["dashboard analitico", "analitico", "vendedor", "vendedores", "ranking", "faturamento", "mais vendido", "insights", "pdf"] },
+  { path: "/app/alertas", label: "Alertas de Negócio", keywords: ["alerta", "alertas", "margem baixa", "estoque parado", "reposicao", "repor", "parado", "aviso", "avisos"] },
   { path: "/app/bi", label: "BI", keywords: ["bi", "indicador", "indicadores", "business intelligence", "analise", "analises"] },
   { path: "/app/financeiro", label: "Financeiro", keywords: ["financeiro", "financas", "caixa", "lancamento", "lancamentos", "receita", "despesa"] },
   { path: "/app/relatorios", label: "Relatórios", keywords: ["relatorio", "relatorios", "exportar", "export", "csv"] },

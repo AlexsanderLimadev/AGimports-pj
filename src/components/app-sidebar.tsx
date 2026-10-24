@@ -17,6 +17,7 @@ import {
   Settings,
   Truck,
   TrendingUp,
+  BellRing,
 } from "lucide-react";
 import {
   Sidebar,
@@ -71,6 +72,7 @@ const groups: { label: string; items: { title: string; url: string; icon: any }[
       { title: "Automações", url: "/app/automacoes", icon: Zap },
       { title: "Métricas de Negócio", url: "/app/metricas", icon: TrendingUp },
       { title: "Dashboard Analítico", url: "/app/dashboard-analitico", icon: BarChart3 },
+      { title: "Alertas", url: "/app/alertas", icon: BellRing },
     ],
   },
   {

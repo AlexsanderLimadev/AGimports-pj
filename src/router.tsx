@@ -21,7 +21,7 @@ function PaginaCarregando() {
 }
 
 /** Telas que somam dados de vários módulos: precisam refazer após qualquer alteração. */
-const TELAS_DERIVADAS = ["dashboard-stats", "bi-overview", "metricas-negocio", "analise-negocio"];
+const TELAS_DERIVADAS = ["dashboard-stats", "bi-overview", "metricas-negocio", "analise-negocio", "alertas-negocio"];
 
 export const getRouter = () => {
   const queryClient: QueryClient = new QueryClient({

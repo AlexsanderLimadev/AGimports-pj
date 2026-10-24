@@ -1,5 +1,5 @@
 import { createFileRoute, Link, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
-import { Bell, LogOut, Search, PackageX, Wallet, PartyPopper } from "lucide-react";
+import { Bell, LogOut, Search, PackageX, Wallet, PartyPopper, TrendingDown, Hourglass } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
@@ -11,6 +11,8 @@ import { resolveSearch, APP_SEARCH_ROUTES } from "@/lib/search-routes";
 import { dashboardStats } from "@/lib/products.functions";
 import { listLancamentos } from "@/lib/financeiro.functions";
 import { logAccess } from "@/lib/access-log.functions";
+import { getAlertasNegocio } from "@/lib/alertas.functions";
+import { useQuery } from "@tanstack/react-query";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -58,7 +60,17 @@ function AppLayout() {
     loadAlerts();
   }, [statsFn, lancamentosFn]);
 
-  const totalAlerts = alerts.lowStock + alerts.vencidos;
+  // Alertas de negócio (margem baixa e estoque parado). Se falhar, o sino segue com os outros.
+  const { data: negocio } = useQuery({
+    queryKey: ["alertas-negocio"],
+    queryFn: () => getAlertasNegocio(),
+    staleTime: 60_000,
+    retry: false,
+  });
+  const margemBaixa = negocio?.margemBaixa.length ?? 0;
+  const estoqueParado = negocio?.estoqueParado.length ?? 0;
+
+  const totalAlerts = alerts.lowStock + alerts.vencidos + margemBaixa + estoqueParado;
 
   const initials = (email.split("@")[0] || "AG").slice(0, 2).toUpperCase();
 
@@ -129,6 +141,18 @@ function AppLayout() {
                         <DropdownMenuItem onClick={() => navigate({ to: "/app/estoque" })} className="cursor-pointer gap-2">
                           <PackageX className="h-4 w-4 text-warning" />
                           <span>{alerts.lowStock} produto{alerts.lowStock > 1 ? "s" : ""} com estoque baixo</span>
+                        </DropdownMenuItem>
+                      )}
+                      {margemBaixa > 0 && (
+                        <DropdownMenuItem onClick={() => navigate({ to: "/app/alertas" })} className="cursor-pointer gap-2">
+                          <TrendingDown className="h-4 w-4 text-warning" />
+                          <span>{margemBaixa} produto{margemBaixa > 1 ? "s" : ""} com margem baixa</span>
+                        </DropdownMenuItem>
+                      )}
+                      {estoqueParado > 0 && (
+                        <DropdownMenuItem onClick={() => navigate({ to: "/app/alertas" })} className="cursor-pointer gap-2">
+                          <Hourglass className="h-4 w-4 text-warning" />
+                          <span>{estoqueParado} produto{estoqueParado > 1 ? "s" : ""} com estoque parado</span>
                         </DropdownMenuItem>
                       )}
                     </>
