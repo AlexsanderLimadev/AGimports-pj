@@ -1,5 +1,5 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { queryOptions, useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { queryOptions, useMutation, useQuery, useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { PageHeader, StatusPill } from "@/components/ui-bits";
 import { brl } from "@/lib/mock/data";
@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { listVendedores } from "@/lib/vendedores.functions";
 import {
   createPedido,
   deletePedido,
@@ -59,10 +60,18 @@ function Pedidos() {
   const qc = useQueryClient();
   const invalidate = () => qc.invalidateQueries({ queryKey: ["pedidos"] });
 
+  const { data: vendedores = [] } = useQuery({
+    queryKey: ["vendedores"],
+    queryFn: () => listVendedores(),
+    staleTime: 60_000,
+    retry: false,
+  });
+  const vendedoresAtivos = vendedores.filter((v) => v.ativo);
+
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({
     cliente: "",
-    vendedor: "",
+    vendedor_id: "",
     descricao: "",
     qty: 1,
     unit: 0,
@@ -75,7 +84,7 @@ function Pedidos() {
       createPedido({
         data: {
           cliente_nome_snapshot: form.cliente.trim(),
-          vendedor_nome: form.vendedor.trim() || null,
+          vendedor_id: form.vendedor_id || null,
           status: form.status,
           canal: form.canal,
           itens: [
@@ -90,7 +99,7 @@ function Pedidos() {
     onSuccess: () => {
       toast.success("Pedido criado");
       setOpen(false);
-      setForm({ cliente: "", vendedor: "", descricao: "", qty: 1, unit: 0, canal: "site", status: "novo" });
+      setForm({ cliente: "", vendedor_id: "", descricao: "", qty: 1, unit: 0, canal: "site", status: "novo" });
       invalidate();
     },
     onError: (e: Error) => toast.error(e.message),
@@ -148,7 +157,22 @@ function Pedidos() {
                 </div>
                 <div className="grid gap-1.5">
                   <Label>Vendedor</Label>
-                  <Input value={form.vendedor} onChange={(e) => setForm({ ...form, vendedor: e.target.value })} placeholder="Quem fez a venda (opcional)" />
+                  {vendedoresAtivos.length === 0 ? (
+                    <p className="text-xs text-muted-foreground">
+                      Nenhum vendedor cadastrado. <Link to="/app/vendedores" className="underline underline-offset-2">Cadastrar vendedor</Link>
+                    </p>
+                  ) : (
+                    <Select
+                      value={form.vendedor_id || "nenhum"}
+                      onValueChange={(v) => setForm({ ...form, vendedor_id: v === "nenhum" ? "" : v })}
+                    >
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="nenhum">Sem vendedor</SelectItem>
+                        {vendedoresAtivos.map((v) => <SelectItem key={v.id} value={v.id}>{v.nome}</SelectItem>)}
+                      </SelectContent>
+                    </Select>
+                  )}
                 </div>
                 <div className="grid gap-1.5">
                   <Label>Descrição do item</Label>

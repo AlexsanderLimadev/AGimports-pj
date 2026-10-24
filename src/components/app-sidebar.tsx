@@ -18,6 +18,7 @@ import {
   Truck,
   TrendingUp,
   BellRing,
+  UserCheck,
 } from "lucide-react";
 import {
   Sidebar,
@@ -54,6 +55,7 @@ const groups: { label: string; items: { title: string; url: string; icon: any }[
     label: "Vendas",
     items: [
       { title: "Pedidos", url: "/app/pedidos", icon: ShoppingCart },
+      { title: "Vendedores", url: "/app/vendedores", icon: UserCheck },
       { title: "Funis", url: "/app/funis", icon: GitBranch },
       { title: "Calculadora", url: "/app/calculadora", icon: Calculator },
     ],
