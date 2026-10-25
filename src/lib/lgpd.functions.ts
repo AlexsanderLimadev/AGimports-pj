@@ -11,7 +11,7 @@ const idInput = (d: unknown) => z.object({ cliente_id: z.string().uuid() }).pars
  */
 export const exportClienteData = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .inputValidator(idInput)
+  .validator(idInput)
   .handler(async ({ data, context }) =>
     withCapture("exportClienteData", context.userId, async () => {
       const { data: cliente, error } = await context.supabase
@@ -75,7 +75,7 @@ export const exportClienteData = createServerFn({ method: "GET" })
  */
 export const anonymizeCliente = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator(idInput)
+  .validator(idInput)
   .handler(async ({ data, context }) =>
     withCapture("anonymizeCliente", context.userId, async () => {
       const anonId = data.cliente_id.slice(0, 8);

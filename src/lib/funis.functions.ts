@@ -55,7 +55,7 @@ export const listFunis = createServerFn({ method: "GET" })
 
 export const getFunil = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => z.object({ id: z.string().uuid() }).parse(d))
+  .validator((d: unknown) => z.object({ id: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
     const { data: funil, error } = await context.supabase
       .from("funis")
@@ -73,7 +73,7 @@ export const getFunil = createServerFn({ method: "GET" })
 
 export const createFunil = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) =>
+  .validator((d: unknown) =>
     z
       .object({
         nome: z.string().trim().min(1).max(120),
@@ -112,7 +112,7 @@ export const createFunil = createServerFn({ method: "POST" })
 
 export const updateFunil = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) =>
+  .validator((d: unknown) =>
     z.object({ id: z.string().uuid(), nome: z.string().trim().min(1).max(120) }).parse(d),
   )
   .handler(async ({ data, context }) => {
@@ -126,7 +126,7 @@ export const updateFunil = createServerFn({ method: "POST" })
 
 export const deleteFunil = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => z.object({ id: z.string().uuid() }).parse(d))
+  .validator((d: unknown) => z.object({ id: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
     const { error } = await context.supabase
       .from("funis")
@@ -138,7 +138,7 @@ export const deleteFunil = createServerFn({ method: "POST" })
 
 export const addEtapa = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) =>
+  .validator((d: unknown) =>
     z.object({ funil_id: z.string().uuid(), etapa: etapaSchema }).parse(d),
   )
   .handler(async ({ data, context }) => {
@@ -163,7 +163,7 @@ export const addEtapa = createServerFn({ method: "POST" })
 
 export const updateEtapa = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) =>
+  .validator((d: unknown) =>
     z.object({ id: z.string().uuid(), patch: etapaSchema.partial() }).parse(d),
   )
   .handler(async ({ data, context }) => {
@@ -177,7 +177,7 @@ export const updateEtapa = createServerFn({ method: "POST" })
 
 export const deleteEtapa = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => z.object({ id: z.string().uuid() }).parse(d))
+  .validator((d: unknown) => z.object({ id: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
     const { error } = await context.supabase.from("funil_etapas").delete().eq("id", data.id);
     if (error) throw new Error(error.message);

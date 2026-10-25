@@ -26,7 +26,7 @@ export const listCalculos = createServerFn({ method: "GET" })
 
 export const saveCalculo = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => calcSchema.parse(d))
+  .validator((d: unknown) => calcSchema.parse(d))
   .handler(async ({ data, context }) => {
     const { data: row, error } = await context.supabase
       .from("calculadora_historico")
@@ -39,7 +39,7 @@ export const saveCalculo = createServerFn({ method: "POST" })
 
 export const deleteCalculo = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => z.object({ id: z.string().uuid() }).parse(d))
+  .validator((d: unknown) => z.object({ id: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
     const { error } = await context.supabase
       .from("calculadora_historico")

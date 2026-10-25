@@ -37,7 +37,7 @@ export const listSuppliers = createServerFn({ method: "GET" })
 
 export const createSupplier = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => supplierSchema.parse(d))
+  .validator((d: unknown) => supplierSchema.parse(d))
   .handler(async ({ data, context }) => {
     await enforceRateLimit(context.supabase, context.userId, "createSupplier", 40);
     const { data: row, error } = await context.supabase
@@ -59,7 +59,7 @@ export const createSupplier = createServerFn({ method: "POST" })
 
 export const updateSupplier = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) =>
+  .validator((d: unknown) =>
     z.object({ id: z.string().uuid(), patch: supplierSchema.partial() }).parse(d),
   )
   .handler(async ({ data, context }) => {
@@ -73,7 +73,7 @@ export const updateSupplier = createServerFn({ method: "POST" })
 
 export const deleteSupplier = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => z.object({ id: z.string().uuid() }).parse(d))
+  .validator((d: unknown) => z.object({ id: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
     const { error } = await context.supabase
       .from("suppliers")

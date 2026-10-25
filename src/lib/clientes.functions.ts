@@ -29,7 +29,7 @@ export const listClientes = createServerFn({ method: "GET" })
 
 export const getCliente = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => z.object({ id: z.string().uuid() }).parse(d))
+  .validator((d: unknown) => z.object({ id: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
     const { data: cliente, error } = await context.supabase
       .from("clientes")
@@ -47,7 +47,7 @@ export const getCliente = createServerFn({ method: "GET" })
 
 export const createCliente = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => clienteSchema.parse(d))
+  .validator((d: unknown) => clienteSchema.parse(d))
   .handler(async ({ data, context }) => {
     await enforceRateLimit(context.supabase, context.userId, "createCliente", 40);
     return withCapture("createCliente", context.userId, async () => {
@@ -64,7 +64,7 @@ export const createCliente = createServerFn({ method: "POST" })
 
 export const updateCliente = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) =>
+  .validator((d: unknown) =>
     z.object({ id: z.string().uuid(), patch: clienteSchema.partial() }).parse(d),
   )
   .handler(async ({ data, context }) => {
@@ -75,7 +75,7 @@ export const updateCliente = createServerFn({ method: "POST" })
 
 export const deleteCliente = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => z.object({ id: z.string().uuid() }).parse(d))
+  .validator((d: unknown) => z.object({ id: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
     const { error } = await context.supabase
       .from("clientes")

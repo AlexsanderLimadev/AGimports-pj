@@ -17,7 +17,7 @@ const finSchema = z.object({
 
 export const listLancamentos = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) =>
+  .validator((d: unknown) =>
     z.object({ from: z.string().optional(), to: z.string().optional() }).parse(d ?? {}),
   )
   .handler(async ({ data, context }) => {
@@ -36,7 +36,7 @@ export const listLancamentos = createServerFn({ method: "GET" })
 
 export const createLancamento = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => finSchema.parse(d))
+  .validator((d: unknown) => finSchema.parse(d))
   .handler(async ({ data, context }) => {
     await enforceRateLimit(context.supabase, context.userId, "createLancamento", 60);
     return withCapture("createLancamento", context.userId, async () => {
@@ -53,7 +53,7 @@ export const createLancamento = createServerFn({ method: "POST" })
 
 export const updateLancamento = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) =>
+  .validator((d: unknown) =>
     z.object({ id: z.string().uuid(), patch: finSchema.partial() }).parse(d),
   )
   .handler(async ({ data, context }) => {
@@ -67,7 +67,7 @@ export const updateLancamento = createServerFn({ method: "POST" })
 
 export const deleteLancamento = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => z.object({ id: z.string().uuid() }).parse(d))
+  .validator((d: unknown) => z.object({ id: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
     const { error } = await context.supabase
       .from("financeiro_lancamentos")

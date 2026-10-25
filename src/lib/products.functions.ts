@@ -17,7 +17,7 @@ export const listCategories = createServerFn({ method: "GET" })
 
 export const createCategory = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => z.object({ name: z.string().trim().min(1).max(80) }).parse(d))
+  .validator((d: unknown) => z.object({ name: z.string().trim().min(1).max(80) }).parse(d))
   .handler(async ({ data, context }) => {
     await enforceRateLimit(context.supabase, context.userId, "createCategory", 40);
     const { data: row, error } = await context.supabase
@@ -74,7 +74,7 @@ export const listProducts = createServerFn({ method: "GET" })
 
 export const createProduct = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => productSchema.parse(d))
+  .validator((d: unknown) => productSchema.parse(d))
   .handler(async ({ data, context }) => {
     await enforceRateLimit(context.supabase, context.userId, "createProduct", 40);
     const payload = { ...data, user_id: context.userId, image_url: data.image_url || null };
@@ -89,7 +89,7 @@ export const createProduct = createServerFn({ method: "POST" })
 
 export const updateProduct = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) =>
+  .validator((d: unknown) =>
     z.object({ id: z.string().uuid(), patch: productSchema.partial() }).parse(d),
   )
   .handler(async ({ data, context }) => {
@@ -105,7 +105,7 @@ export const updateProduct = createServerFn({ method: "POST" })
 
 export const deleteProduct = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => z.object({ id: z.string().uuid() }).parse(d))
+  .validator((d: unknown) => z.object({ id: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
     const { error } = await context.supabase
       .from("products")
@@ -130,7 +130,7 @@ export const listMovements = createServerFn({ method: "GET" })
 
 export const createMovement = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) =>
+  .validator((d: unknown) =>
     z
       .object({
         product_id: z.string().uuid(),

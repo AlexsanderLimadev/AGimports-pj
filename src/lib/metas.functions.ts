@@ -85,7 +85,7 @@ export const listMetas = createServerFn({ method: "GET" })
 
 export const createMeta = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => metaSchema.parse(d))
+  .validator((d: unknown) => metaSchema.parse(d))
   .handler(async ({ data, context }) => {
     await enforceRateLimit(context.supabase, context.userId, "createMeta", 40);
     const { data: row, error } = await context.supabase
@@ -99,7 +99,7 @@ export const createMeta = createServerFn({ method: "POST" })
 
 export const updateMeta = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) =>
+  .validator((d: unknown) =>
     z.object({ id: z.string().uuid(), patch: metaSchema.partial() }).parse(d),
   )
   .handler(async ({ data, context }) => {
@@ -110,7 +110,7 @@ export const updateMeta = createServerFn({ method: "POST" })
 
 export const deleteMeta = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => z.object({ id: z.string().uuid() }).parse(d))
+  .validator((d: unknown) => z.object({ id: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
     const { error } = await context.supabase
       .from("metas")

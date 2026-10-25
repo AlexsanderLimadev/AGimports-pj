@@ -29,7 +29,7 @@ export const listCampanhas = createServerFn({ method: "GET" })
 
 export const createCampanha = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => campanhaSchema.parse(d))
+  .validator((d: unknown) => campanhaSchema.parse(d))
   .handler(async ({ data, context }) => {
     await enforceRateLimit(context.supabase, context.userId, "createCampanha", 40);
     const { data: row, error } = await context.supabase
@@ -43,7 +43,7 @@ export const createCampanha = createServerFn({ method: "POST" })
 
 export const updateCampanha = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) =>
+  .validator((d: unknown) =>
     z.object({ id: z.string().uuid(), patch: campanhaSchema.partial() }).parse(d),
   )
   .handler(async ({ data, context }) => {
@@ -54,7 +54,7 @@ export const updateCampanha = createServerFn({ method: "POST" })
 
 export const deleteCampanha = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => z.object({ id: z.string().uuid() }).parse(d))
+  .validator((d: unknown) => z.object({ id: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
     const { error } = await context.supabase
       .from("campanhas")
