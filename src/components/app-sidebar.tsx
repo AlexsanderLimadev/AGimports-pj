@@ -19,6 +19,7 @@ import {
   TrendingUp,
   BellRing,
   UserCheck,
+  UserMinus,
 } from "lucide-react";
 import {
   Sidebar,
@@ -75,6 +76,7 @@ const groups: { label: string; items: { title: string; url: string; icon: any }[
       { title: "Métricas de Negócio", url: "/app/metricas", icon: TrendingUp },
       { title: "Dashboard Analítico", url: "/app/dashboard-analitico", icon: BarChart3 },
       { title: "Alertas", url: "/app/alertas", icon: BellRing },
+      { title: "Clientes que sumiram", url: "/app/clientes-sumidos", icon: UserMinus },
     ],
   },
   {
