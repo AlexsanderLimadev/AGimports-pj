@@ -249,7 +249,7 @@ function Editor() {
           <DialogHeader><DialogTitle>{editingId ? "Editar etapa" : "Nova etapa"}</DialogTitle></DialogHeader>
           <div className="grid gap-3">
             <div className="grid gap-1.5"><Label>Nome</Label><Input value={form.nome} onChange={(e) => setForm({ ...form, nome: e.target.value })} placeholder="Ex.: Checkout" /></div>
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
               <div className="grid gap-1.5"><Label>Pessoas</Label><Input type="number" value={form.pessoas} onChange={(e) => setForm({ ...form, pessoas: Number(e.target.value) })} /></div>
               <div className="grid gap-1.5"><Label>Conv. %</Label><Input type="number" value={form.conv} onChange={(e) => setForm({ ...form, conv: Number(e.target.value) })} /></div>
               <div className="grid gap-1.5"><Label>Valor (R$)</Label><Input type="number" step="0.01" value={form.valor} onChange={(e) => setForm({ ...form, valor: Number(e.target.value) })} /></div>

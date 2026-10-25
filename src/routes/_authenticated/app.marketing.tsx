@@ -147,7 +147,7 @@ function Marketing() {
                     </Select>
                   </div>
                 </div>
-                <div className="grid grid-cols-3 gap-3">
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
                   <div className="grid gap-1.5"><Label>Budget</Label><Input type="number" step="0.01" value={form.budget} onChange={(e) => setForm({ ...form, budget: Number(e.target.value) })} /></div>
                   <div className="grid gap-1.5"><Label>Gasto</Label><Input type="number" step="0.01" value={form.gasto} onChange={(e) => setForm({ ...form, gasto: Number(e.target.value) })} /></div>
                   <div className="grid gap-1.5"><Label>Receita</Label><Input type="number" step="0.01" value={form.receita} onChange={(e) => setForm({ ...form, receita: Number(e.target.value) })} /></div>
