@@ -18,10 +18,12 @@ import { Route as TermosRouteImport } from './routes/termos'
 import { Route as AuthenticatedAppRouteImport } from './routes/_authenticated/app'
 import { Route as AuthenticatedAppIndexRouteImport } from './routes/_authenticated/app.index'
 import { Route as AuthenticatedAppAgendaRouteImport } from './routes/_authenticated/app.agenda'
+import { Route as AuthenticatedAppAlertasRouteImport } from './routes/_authenticated/app.alertas'
 import { Route as AuthenticatedAppAutomacoesRouteImport } from './routes/_authenticated/app.automacoes'
 import { Route as AuthenticatedAppBiRouteImport } from './routes/_authenticated/app.bi'
 import { Route as AuthenticatedAppCalculadoraRouteImport } from './routes/_authenticated/app.calculadora'
 import { Route as AuthenticatedAppClientesRouteImport } from './routes/_authenticated/app.clientes'
+import { Route as AuthenticatedAppClientesSumidosRouteImport } from './routes/_authenticated/app.clientes-sumidos'
 import { Route as AuthenticatedAppConfiguracoesRouteImport } from './routes/_authenticated/app.configuracoes'
 import { Route as AuthenticatedAppDashboardAnaliticoRouteImport } from './routes/_authenticated/app.dashboard-analitico'
 import { Route as AuthenticatedAppEstoqueRouteImport } from './routes/_authenticated/app.estoque'
@@ -33,6 +35,7 @@ import { Route as AuthenticatedAppMetricasRouteImport } from './routes/_authenti
 import { Route as AuthenticatedAppPedidosRouteImport } from './routes/_authenticated/app.pedidos'
 import { Route as AuthenticatedAppProdutosRouteImport } from './routes/_authenticated/app.produtos'
 import { Route as AuthenticatedAppRelatoriosRouteImport } from './routes/_authenticated/app.relatorios'
+import { Route as AuthenticatedAppVendedoresRouteImport } from './routes/_authenticated/app.vendedores'
 import { Route as AuthenticatedAppFunisIndexRouteImport } from './routes/_authenticated/app.funis.index'
 import { Route as AuthenticatedAppFunisIdRouteImport } from './routes/_authenticated/app.funis.$id'
 
@@ -80,6 +83,11 @@ const AuthenticatedAppAgendaRoute = AuthenticatedAppAgendaRouteImport.update({
   path: '/agenda',
   getParentRoute: () => AuthenticatedAppRoute,
 } as any)
+const AuthenticatedAppAlertasRoute = AuthenticatedAppAlertasRouteImport.update({
+  id: '/alertas',
+  path: '/alertas',
+  getParentRoute: () => AuthenticatedAppRoute,
+} as any)
 const AuthenticatedAppAutomacoesRoute =
   AuthenticatedAppAutomacoesRouteImport.update({
     id: '/automacoes',
@@ -101,6 +109,12 @@ const AuthenticatedAppClientesRoute =
   AuthenticatedAppClientesRouteImport.update({
     id: '/clientes',
     path: '/clientes',
+    getParentRoute: () => AuthenticatedAppRoute,
+  } as any)
+const AuthenticatedAppClientesSumidosRoute =
+  AuthenticatedAppClientesSumidosRouteImport.update({
+    id: '/clientes-sumidos',
+    path: '/clientes-sumidos',
     getParentRoute: () => AuthenticatedAppRoute,
   } as any)
 const AuthenticatedAppConfiguracoesRoute =
@@ -166,6 +180,12 @@ const AuthenticatedAppRelatoriosRoute =
     path: '/relatorios',
     getParentRoute: () => AuthenticatedAppRoute,
   } as any)
+const AuthenticatedAppVendedoresRoute =
+  AuthenticatedAppVendedoresRouteImport.update({
+    id: '/vendedores',
+    path: '/vendedores',
+    getParentRoute: () => AuthenticatedAppRoute,
+  } as any)
 const AuthenticatedAppFunisIndexRoute =
   AuthenticatedAppFunisIndexRouteImport.update({
     id: '/funis/',
@@ -186,10 +206,12 @@ export interface FileRoutesByFullPath {
   '/termos': typeof TermosRoute
   '/app': typeof AuthenticatedAppRouteWithChildren
   '/app/agenda': typeof AuthenticatedAppAgendaRoute
+  '/app/alertas': typeof AuthenticatedAppAlertasRoute
   '/app/automacoes': typeof AuthenticatedAppAutomacoesRoute
   '/app/bi': typeof AuthenticatedAppBiRoute
   '/app/calculadora': typeof AuthenticatedAppCalculadoraRoute
   '/app/clientes': typeof AuthenticatedAppClientesRoute
+  '/app/clientes-sumidos': typeof AuthenticatedAppClientesSumidosRoute
   '/app/configuracoes': typeof AuthenticatedAppConfiguracoesRoute
   '/app/dashboard-analitico': typeof AuthenticatedAppDashboardAnaliticoRoute
   '/app/estoque': typeof AuthenticatedAppEstoqueRoute
@@ -201,6 +223,7 @@ export interface FileRoutesByFullPath {
   '/app/pedidos': typeof AuthenticatedAppPedidosRoute
   '/app/produtos': typeof AuthenticatedAppProdutosRoute
   '/app/relatorios': typeof AuthenticatedAppRelatoriosRoute
+  '/app/vendedores': typeof AuthenticatedAppVendedoresRoute
   '/app/': typeof AuthenticatedAppIndexRoute
   '/app/funis/$id': typeof AuthenticatedAppFunisIdRoute
   '/app/funis/': typeof AuthenticatedAppFunisIndexRoute
@@ -212,10 +235,12 @@ export interface FileRoutesByTo {
   '/reset-password': typeof ResetPasswordRoute
   '/termos': typeof TermosRoute
   '/app/agenda': typeof AuthenticatedAppAgendaRoute
+  '/app/alertas': typeof AuthenticatedAppAlertasRoute
   '/app/automacoes': typeof AuthenticatedAppAutomacoesRoute
   '/app/bi': typeof AuthenticatedAppBiRoute
   '/app/calculadora': typeof AuthenticatedAppCalculadoraRoute
   '/app/clientes': typeof AuthenticatedAppClientesRoute
+  '/app/clientes-sumidos': typeof AuthenticatedAppClientesSumidosRoute
   '/app/configuracoes': typeof AuthenticatedAppConfiguracoesRoute
   '/app/dashboard-analitico': typeof AuthenticatedAppDashboardAnaliticoRoute
   '/app/estoque': typeof AuthenticatedAppEstoqueRoute
@@ -227,6 +252,7 @@ export interface FileRoutesByTo {
   '/app/pedidos': typeof AuthenticatedAppPedidosRoute
   '/app/produtos': typeof AuthenticatedAppProdutosRoute
   '/app/relatorios': typeof AuthenticatedAppRelatoriosRoute
+  '/app/vendedores': typeof AuthenticatedAppVendedoresRoute
   '/app': typeof AuthenticatedAppIndexRoute
   '/app/funis/$id': typeof AuthenticatedAppFunisIdRoute
   '/app/funis': typeof AuthenticatedAppFunisIndexRoute
@@ -241,10 +267,12 @@ export interface FileRoutesById {
   '/termos': typeof TermosRoute
   '/_authenticated/app': typeof AuthenticatedAppRouteWithChildren
   '/_authenticated/app/agenda': typeof AuthenticatedAppAgendaRoute
+  '/_authenticated/app/alertas': typeof AuthenticatedAppAlertasRoute
   '/_authenticated/app/automacoes': typeof AuthenticatedAppAutomacoesRoute
   '/_authenticated/app/bi': typeof AuthenticatedAppBiRoute
   '/_authenticated/app/calculadora': typeof AuthenticatedAppCalculadoraRoute
   '/_authenticated/app/clientes': typeof AuthenticatedAppClientesRoute
+  '/_authenticated/app/clientes-sumidos': typeof AuthenticatedAppClientesSumidosRoute
   '/_authenticated/app/configuracoes': typeof AuthenticatedAppConfiguracoesRoute
   '/_authenticated/app/dashboard-analitico': typeof AuthenticatedAppDashboardAnaliticoRoute
   '/_authenticated/app/estoque': typeof AuthenticatedAppEstoqueRoute
@@ -256,6 +284,7 @@ export interface FileRoutesById {
   '/_authenticated/app/pedidos': typeof AuthenticatedAppPedidosRoute
   '/_authenticated/app/produtos': typeof AuthenticatedAppProdutosRoute
   '/_authenticated/app/relatorios': typeof AuthenticatedAppRelatoriosRoute
+  '/_authenticated/app/vendedores': typeof AuthenticatedAppVendedoresRoute
   '/_authenticated/app/': typeof AuthenticatedAppIndexRoute
   '/_authenticated/app/funis/$id': typeof AuthenticatedAppFunisIdRoute
   '/_authenticated/app/funis/': typeof AuthenticatedAppFunisIndexRoute
@@ -270,10 +299,12 @@ export interface FileRouteTypes {
     | '/termos'
     | '/app'
     | '/app/agenda'
+    | '/app/alertas'
     | '/app/automacoes'
     | '/app/bi'
     | '/app/calculadora'
     | '/app/clientes'
+    | '/app/clientes-sumidos'
     | '/app/configuracoes'
     | '/app/dashboard-analitico'
     | '/app/estoque'
@@ -285,6 +316,7 @@ export interface FileRouteTypes {
     | '/app/pedidos'
     | '/app/produtos'
     | '/app/relatorios'
+    | '/app/vendedores'
     | '/app/'
     | '/app/funis/$id'
     | '/app/funis/'
@@ -296,10 +328,12 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/termos'
     | '/app/agenda'
+    | '/app/alertas'
     | '/app/automacoes'
     | '/app/bi'
     | '/app/calculadora'
     | '/app/clientes'
+    | '/app/clientes-sumidos'
     | '/app/configuracoes'
     | '/app/dashboard-analitico'
     | '/app/estoque'
@@ -311,6 +345,7 @@ export interface FileRouteTypes {
     | '/app/pedidos'
     | '/app/produtos'
     | '/app/relatorios'
+    | '/app/vendedores'
     | '/app'
     | '/app/funis/$id'
     | '/app/funis'
@@ -324,10 +359,12 @@ export interface FileRouteTypes {
     | '/termos'
     | '/_authenticated/app'
     | '/_authenticated/app/agenda'
+    | '/_authenticated/app/alertas'
     | '/_authenticated/app/automacoes'
     | '/_authenticated/app/bi'
     | '/_authenticated/app/calculadora'
     | '/_authenticated/app/clientes'
+    | '/_authenticated/app/clientes-sumidos'
     | '/_authenticated/app/configuracoes'
     | '/_authenticated/app/dashboard-analitico'
     | '/_authenticated/app/estoque'
@@ -339,6 +376,7 @@ export interface FileRouteTypes {
     | '/_authenticated/app/pedidos'
     | '/_authenticated/app/produtos'
     | '/_authenticated/app/relatorios'
+    | '/_authenticated/app/vendedores'
     | '/_authenticated/app/'
     | '/_authenticated/app/funis/$id'
     | '/_authenticated/app/funis/'
@@ -418,6 +456,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppAgendaRouteImport
       parentRoute: typeof AuthenticatedAppRoute
     }
+    '/_authenticated/app/alertas': {
+      id: '/_authenticated/app/alertas'
+      path: '/alertas'
+      fullPath: '/app/alertas'
+      preLoaderRoute: typeof AuthenticatedAppAlertasRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
     '/_authenticated/app/automacoes': {
       id: '/_authenticated/app/automacoes'
       path: '/automacoes'
@@ -444,6 +489,13 @@ declare module '@tanstack/react-router' {
       path: '/clientes'
       fullPath: '/app/clientes'
       preLoaderRoute: typeof AuthenticatedAppClientesRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
+    '/_authenticated/app/clientes-sumidos': {
+      id: '/_authenticated/app/clientes-sumidos'
+      path: '/clientes-sumidos'
+      fullPath: '/app/clientes-sumidos'
+      preLoaderRoute: typeof AuthenticatedAppClientesSumidosRouteImport
       parentRoute: typeof AuthenticatedAppRoute
     }
     '/_authenticated/app/configuracoes': {
@@ -523,6 +575,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppRelatoriosRouteImport
       parentRoute: typeof AuthenticatedAppRoute
     }
+    '/_authenticated/app/vendedores': {
+      id: '/_authenticated/app/vendedores'
+      path: '/vendedores'
+      fullPath: '/app/vendedores'
+      preLoaderRoute: typeof AuthenticatedAppVendedoresRouteImport
+      parentRoute: typeof AuthenticatedAppRoute
+    }
     '/_authenticated/app/funis/': {
       id: '/_authenticated/app/funis/'
       path: '/funis'
@@ -542,10 +601,12 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedAppRouteChildren {
   AuthenticatedAppAgendaRoute: typeof AuthenticatedAppAgendaRoute
+  AuthenticatedAppAlertasRoute: typeof AuthenticatedAppAlertasRoute
   AuthenticatedAppAutomacoesRoute: typeof AuthenticatedAppAutomacoesRoute
   AuthenticatedAppBiRoute: typeof AuthenticatedAppBiRoute
   AuthenticatedAppCalculadoraRoute: typeof AuthenticatedAppCalculadoraRoute
   AuthenticatedAppClientesRoute: typeof AuthenticatedAppClientesRoute
+  AuthenticatedAppClientesSumidosRoute: typeof AuthenticatedAppClientesSumidosRoute
   AuthenticatedAppConfiguracoesRoute: typeof AuthenticatedAppConfiguracoesRoute
   AuthenticatedAppDashboardAnaliticoRoute: typeof AuthenticatedAppDashboardAnaliticoRoute
   AuthenticatedAppEstoqueRoute: typeof AuthenticatedAppEstoqueRoute
@@ -557,6 +618,7 @@ interface AuthenticatedAppRouteChildren {
   AuthenticatedAppPedidosRoute: typeof AuthenticatedAppPedidosRoute
   AuthenticatedAppProdutosRoute: typeof AuthenticatedAppProdutosRoute
   AuthenticatedAppRelatoriosRoute: typeof AuthenticatedAppRelatoriosRoute
+  AuthenticatedAppVendedoresRoute: typeof AuthenticatedAppVendedoresRoute
   AuthenticatedAppIndexRoute: typeof AuthenticatedAppIndexRoute
   AuthenticatedAppFunisIdRoute: typeof AuthenticatedAppFunisIdRoute
   AuthenticatedAppFunisIndexRoute: typeof AuthenticatedAppFunisIndexRoute
@@ -564,10 +626,12 @@ interface AuthenticatedAppRouteChildren {
 
 const AuthenticatedAppRouteChildren: AuthenticatedAppRouteChildren = {
   AuthenticatedAppAgendaRoute: AuthenticatedAppAgendaRoute,
+  AuthenticatedAppAlertasRoute: AuthenticatedAppAlertasRoute,
   AuthenticatedAppAutomacoesRoute: AuthenticatedAppAutomacoesRoute,
   AuthenticatedAppBiRoute: AuthenticatedAppBiRoute,
   AuthenticatedAppCalculadoraRoute: AuthenticatedAppCalculadoraRoute,
   AuthenticatedAppClientesRoute: AuthenticatedAppClientesRoute,
+  AuthenticatedAppClientesSumidosRoute: AuthenticatedAppClientesSumidosRoute,
   AuthenticatedAppConfiguracoesRoute: AuthenticatedAppConfiguracoesRoute,
   AuthenticatedAppDashboardAnaliticoRoute:
     AuthenticatedAppDashboardAnaliticoRoute,
@@ -580,6 +644,7 @@ const AuthenticatedAppRouteChildren: AuthenticatedAppRouteChildren = {
   AuthenticatedAppPedidosRoute: AuthenticatedAppPedidosRoute,
   AuthenticatedAppProdutosRoute: AuthenticatedAppProdutosRoute,
   AuthenticatedAppRelatoriosRoute: AuthenticatedAppRelatoriosRoute,
+  AuthenticatedAppVendedoresRoute: AuthenticatedAppVendedoresRoute,
   AuthenticatedAppIndexRoute: AuthenticatedAppIndexRoute,
   AuthenticatedAppFunisIdRoute: AuthenticatedAppFunisIdRoute,
   AuthenticatedAppFunisIndexRoute: AuthenticatedAppFunisIndexRoute,
