@@ -22,7 +22,7 @@ export const getConfigNegocio = createServerFn({ method: "GET" })
 
 export const saveConfigNegocio = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) =>
+  .validator((d: unknown) =>
     z
       .object({
         margemMinimaPct: z.number().min(0).max(100),

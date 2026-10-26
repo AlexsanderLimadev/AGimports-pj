@@ -21,7 +21,7 @@ const eventoSchema = z.object({
 
 export const listEventos = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) =>
+  .validator((d: unknown) =>
     z.object({ from: z.string(), to: z.string() }).parse(d),
   )
   .handler(async ({ data, context }) => {
@@ -38,7 +38,7 @@ export const listEventos = createServerFn({ method: "GET" })
 
 export const createEvento = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => eventoSchema.parse(d))
+  .validator((d: unknown) => eventoSchema.parse(d))
   .handler(async ({ data, context }) => {
     await enforceRateLimit(context.supabase, context.userId, "createEvento", 60);
     const payload = { ...data, user_id: context.userId, ends_at: data.ends_at || null };
@@ -53,7 +53,7 @@ export const createEvento = createServerFn({ method: "POST" })
 
 export const updateEvento = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) =>
+  .validator((d: unknown) =>
     z.object({ id: z.string().uuid(), patch: eventoSchema.partial() }).parse(d),
   )
   .handler(async ({ data, context }) => {
@@ -67,7 +67,7 @@ export const updateEvento = createServerFn({ method: "POST" })
 
 export const deleteEvento = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => z.object({ id: z.string().uuid() }).parse(d))
+  .validator((d: unknown) => z.object({ id: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
     const { error } = await context.supabase
       .from("eventos")

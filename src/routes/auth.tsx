@@ -9,7 +9,13 @@ import { AGLogoFull, Grain, Grid, useMouseRel } from "@/components/brand-fx";
 import { logAccess } from "@/lib/access-log.functions";
 
 const searchSchema = z.object({
-  redirect: z.string().optional(),
+  // Só caminho interno do próprio site ("/app/..."). Qualquer outra coisa (https://..., //site.com,
+  // barra invertida) é descartada, para ninguém montar um link de login que leva a outro endereço.
+  redirect: z
+    .string()
+    .refine((v) => v.startsWith("/") && !v.startsWith("//") && !v.includes("\\"))
+    .optional()
+    .catch(undefined),
   mode: z.enum(["signin", "signup", "forgot"]).optional(),
 });
 

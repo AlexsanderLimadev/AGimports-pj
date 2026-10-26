@@ -6,7 +6,7 @@ import { withCapture } from "@/lib/observability.server";
 
 export const biOverview = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => z.object({ refresh: z.boolean().optional() }).parse(d ?? {}))
+  .validator((d: unknown) => z.object({ refresh: z.boolean().optional() }).parse(d ?? {}))
   .handler(async ({ data, context }) =>
     withCapture("biOverview", context.userId, () =>
       getBiOverviewCached(context.supabase, context.userId, { refresh: data.refresh ?? false }),

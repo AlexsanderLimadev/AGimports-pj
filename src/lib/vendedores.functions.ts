@@ -45,7 +45,7 @@ export const listVendedores = createServerFn({ method: "GET" })
 
 export const createVendedor = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => z.object({ nome: nomeSchema }).parse(d))
+  .validator((d: unknown) => z.object({ nome: nomeSchema }).parse(d))
   .handler(async ({ data, context }) => {
     await enforceRateLimit(context.supabase, context.userId, "createVendedor", 40);
     const { data: row, error } = await context.supabase
@@ -59,7 +59,7 @@ export const createVendedor = createServerFn({ method: "POST" })
 
 export const updateVendedor = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) =>
+  .validator((d: unknown) =>
     z.object({ id: z.string().uuid(), nome: nomeSchema.optional(), ativo: z.boolean().optional() }).parse(d),
   )
   .handler(async ({ data, context }) => {
@@ -93,7 +93,7 @@ export const updateVendedor = createServerFn({ method: "POST" })
 /** Remove do cadastro. Os pedidos antigos continuam com o nome gravado neles. */
 export const deleteVendedor = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => z.object({ id: z.string().uuid() }).parse(d))
+  .validator((d: unknown) => z.object({ id: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
     await enforceRateLimit(context.supabase, context.userId, "deleteVendedor", 60);
     const { error } = await context.supabase

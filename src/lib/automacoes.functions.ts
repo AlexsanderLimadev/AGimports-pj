@@ -26,7 +26,7 @@ export const listAutomacoes = createServerFn({ method: "GET" })
 
 export const createAutomacao = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => automacaoSchema.parse(d))
+  .validator((d: unknown) => automacaoSchema.parse(d))
   .handler(async ({ data, context }) => {
     await enforceRateLimit(context.supabase, context.userId, "createAutomacao", 40);
     const { data: row, error } = await context.supabase
@@ -40,7 +40,7 @@ export const createAutomacao = createServerFn({ method: "POST" })
 
 export const toggleAutomacao = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) =>
+  .validator((d: unknown) =>
     z.object({ id: z.string().uuid(), ativo: z.boolean() }).parse(d),
   )
   .handler(async ({ data, context }) => {
@@ -54,7 +54,7 @@ export const toggleAutomacao = createServerFn({ method: "POST" })
 
 export const updateAutomacao = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) =>
+  .validator((d: unknown) =>
     z.object({ id: z.string().uuid(), patch: automacaoSchema.partial() }).parse(d),
   )
   .handler(async ({ data, context }) => {
@@ -68,7 +68,7 @@ export const updateAutomacao = createServerFn({ method: "POST" })
 
 export const deleteAutomacao = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) => z.object({ id: z.string().uuid() }).parse(d))
+  .validator((d: unknown) => z.object({ id: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
     const { error } = await context.supabase
       .from("automacoes")

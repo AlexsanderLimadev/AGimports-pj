@@ -12,7 +12,7 @@ const eventSchema = z.enum(["sign_in", "sign_out", "sign_up", "password_reset"])
  */
 export const logAccess = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .inputValidator((d: unknown) =>
+  .validator((d: unknown) =>
     z.object({ event: eventSchema, userAgent: z.string().max(400).optional() }).parse(d),
   )
   .handler(async ({ data, context }) => {
