@@ -866,6 +866,60 @@ export type Database = {
         }
         Relationships: []
       }
+      access_logs: {
+        Row: {
+          created_at: string
+          event: string
+          id: number
+          user_agent: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          event: string
+          id?: never
+          user_agent?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          event?: string
+          id?: never
+          user_agent?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      erros_app: {
+        Row: {
+          codigo: string
+          created_at: string
+          id: string
+          mensagem: string
+          tela: string
+          tipo: string
+          user_id: string
+        }
+        Insert: {
+          codigo: string
+          created_at?: string
+          id?: string
+          mensagem: string
+          tela: string
+          tipo: string
+          user_id: string
+        }
+        Update: {
+          codigo?: string
+          created_at?: string
+          id?: string
+          mensagem?: string
+          tela?: string
+          tipo?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       vendedores: {
         Row: {
           ativo: boolean

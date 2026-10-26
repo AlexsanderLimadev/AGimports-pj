@@ -1,5 +1,16 @@
 import { toast } from "sonner";
-import { interpretarErro } from "@/lib/erros-calc";
+import { interpretarErro, type ErroInterpretado } from "@/lib/erros-calc";
+import { registrarErro } from "@/lib/erros-app.functions";
+
+/** Guarda o erro no painel de Configurações. Em silêncio: nunca pode causar outro erro. */
+export function registrarNoPainel(r: ErroInterpretado): void {
+  if (typeof window === "undefined" || !r.codigo || r.tipo === "rede" || r.tipo === "sessao") return;
+  if (window.location.pathname.startsWith("/auth")) return;
+  const tela = window.location.pathname.slice(0, 200);
+  void Promise.resolve()
+    .then(() => registrarErro({ data: { codigo: r.codigo!, tipo: r.tipo, tela, mensagem: r.mensagem.slice(0, 300) } }))
+    .catch(() => {});
+}
 
 /**
  * Mostra qualquer erro como aviso em português, com código de referência quando há.
@@ -21,6 +32,7 @@ export function notificarErro(e: unknown, opcoes: { tentarNovamente?: () => void
   }
 
   if (r.codigo) console.error(`[erro ${r.codigo}]`, e);
+  registrarNoPainel(r);
   toast.error(r.mensagem, {
     description: r.codigo ? `Código de referência: ${r.codigo}` : undefined,
     duration: r.codigo ? 8000 : 5000,
