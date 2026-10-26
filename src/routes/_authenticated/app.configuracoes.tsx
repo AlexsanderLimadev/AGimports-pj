@@ -17,6 +17,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { AlertasConfig } from "@/components/alertas-config";
+import { ErrosRecentes } from "@/components/erros-recentes";
 import { supabase } from "@/integrations/supabase/client";
 import { listAccessLogs } from "@/lib/access-log.functions";
 import { notificarErro } from "@/lib/notificar-erro";
@@ -172,6 +173,8 @@ function Conf() {
           </div>
         )}
       </SectionCard>
+
+      <ErrosRecentes />
 
       <SectionCard title="Privacidade e dados" description="O que você pode fazer com os dados" className="mt-4">
         <ul className="divide-y divide-border text-sm">

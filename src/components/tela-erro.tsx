@@ -1,7 +1,8 @@
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { Link, useRouter } from "@tanstack/react-router";
 import { TriangleAlert } from "lucide-react";
 import { interpretarErro } from "@/lib/erros-calc";
+import { registrarNoPainel } from "@/lib/notificar-erro";
 
 /**
  * Tela de erro limpa, em português, com código de referência.
@@ -18,6 +19,7 @@ export function TelaErro({
 }) {
   const router = useRouter();
   const r = useMemo(() => interpretarErro(error), [error]);
+  useEffect(() => registrarNoPainel(r), [r]);
 
   return (
     <div className={inteira ? "flex min-h-screen items-center justify-center bg-background px-4" : "flex min-h-[50vh] items-center justify-center px-4"}>
