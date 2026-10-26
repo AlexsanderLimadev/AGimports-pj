@@ -5,7 +5,7 @@ import { interpretarErro } from "@/lib/erros-calc";
  * Mostra qualquer erro como aviso em português, com código de referência quando há.
  * Sessão vencida leva ao login e, depois de entrar, de volta para a mesma tela.
  */
-export function notificarErro(e: unknown): void {
+export function notificarErro(e: unknown, opcoes: { tentarNovamente?: () => void } = {}): void {
   if (typeof window === "undefined") return;
   const r = interpretarErro(e);
 
@@ -24,5 +24,10 @@ export function notificarErro(e: unknown): void {
   toast.error(r.mensagem, {
     description: r.codigo ? `Código de referência: ${r.codigo}` : undefined,
     duration: r.codigo ? 8000 : 5000,
+    // Só oferece repetir quando faz sentido: queda de conexão ou erro que não sabemos explicar.
+    action:
+      opcoes.tentarNovamente && (r.tipo === "rede" || (r.tipo === "generico" && r.codigo))
+        ? { label: "Tentar de novo", onClick: opcoes.tentarNovamente }
+        : undefined,
   });
 }

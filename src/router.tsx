@@ -4,6 +4,7 @@ import { routeTree } from "./routeTree.gen";
 import { Shimmer } from "@/components/ui-bits";
 import { TELAS_DERIVADAS } from "@/lib/telas-derivadas";
 import { notificarErro } from "@/lib/notificar-erro";
+import { TelaErro } from "@/components/tela-erro";
 
 /** Aparece quase na hora ao clicar, enquanto a página nova carrega. */
 function PaginaCarregando() {
@@ -30,7 +31,13 @@ export const getRouter = () => {
         for (const chave of TELAS_DERIVADAS) queryClient.invalidateQueries({ queryKey: [chave] });
       },
       // Todo erro de gravação vira aviso em português com código de referência.
-      onError: (error) => notificarErro(error),
+      onError: (error, variables, _contexto, mutation) =>
+        notificarErro(error, {
+          // "Tentar de novo" refaz a mesma gravação com os mesmos dados.
+          tentarNovamente: () => {
+            void mutation.execute(variables).catch(() => {});
+          },
+        }),
     }),
     defaultOptions: {
       queries: {
@@ -57,6 +64,7 @@ export const getRouter = () => {
     defaultPendingMs: 120,
     defaultPendingMinMs: 250,
     defaultPendingComponent: PaginaCarregando,
+    defaultErrorComponent: ({ error, reset }) => <TelaErro error={error} reset={reset} />,
   });
 
   return router;

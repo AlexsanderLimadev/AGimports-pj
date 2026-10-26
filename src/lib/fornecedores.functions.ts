@@ -4,7 +4,7 @@ import { enforceRateLimit } from "@/lib/rate-limit.server";
 import { z } from "zod";
 import { falhar } from "@/lib/erros.server";
 
-const supplierSchema = z.object({
+export const supplierSchema = z.object({
   name: z.string().trim().min(1).max(200),
   contact_name: z.string().trim().max(200).optional().nullable(),
   phone: z.string().trim().max(40).optional().nullable(),
