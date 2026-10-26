@@ -39,7 +39,6 @@ export function AlertasConfig() {
       qc.invalidateQueries({ queryKey: ["alertas-negocio"] });
       toast.success("Limites salvos");
     },
-    onError: (e: Error) => toast.error(e.message),
   });
 
   const atual = data ?? CONFIG_ALERTAS_PADRAO;

@@ -2,6 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
 import { enforceRateLimit } from "@/lib/rate-limit.server";
+import { falhar } from "@/lib/erros.server";
 
 const EVENTO_TIPOS = ["compromisso", "entrega", "cobranca", "reposicao", "reuniao", "outro"] as const;
 const EVENTO_STATUS = ["pendente", "concluido", "cancelado"] as const;
@@ -32,7 +33,7 @@ export const listEventos = createServerFn({ method: "GET" })
       .gte("starts_at", data.from)
       .lt("starts_at", data.to)
       .order("starts_at", { ascending: true });
-    if (error) throw new Error(error.message);
+    if (error) falhar(error, "agenda");
     return rows ?? [];
   });
 
@@ -47,7 +48,7 @@ export const createEvento = createServerFn({ method: "POST" })
       .insert(payload)
       .select("id")
       .single();
-    if (error) throw new Error(error.message);
+    if (error) falhar(error, "agenda");
     return row;
   });
 
@@ -61,7 +62,7 @@ export const updateEvento = createServerFn({ method: "POST" })
       .from("eventos")
       .update(data.patch)
       .eq("id", data.id);
-    if (error) throw new Error(error.message);
+    if (error) falhar(error, "agenda");
     return { ok: true };
   });
 
@@ -73,6 +74,6 @@ export const deleteEvento = createServerFn({ method: "POST" })
       .from("eventos")
       .update({ deleted_at: new Date().toISOString() })
       .eq("id", data.id);
-    if (error) throw new Error(error.message);
+    if (error) falhar(error, "agenda");
     return { ok: true };
   });

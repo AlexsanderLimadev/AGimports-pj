@@ -2,6 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { enforceRateLimit } from "@/lib/rate-limit.server";
 import { z } from "zod";
+import { falhar } from "@/lib/erros.server";
 
 const supplierSchema = z.object({
   name: z.string().trim().min(1).max(200),
@@ -23,7 +24,7 @@ export const listSuppliers = createServerFn({ method: "GET" })
       .is("deleted_at", null)
       .order("name", { ascending: true })
       .limit(500);
-    if (error) throw new Error(error.message);
+    if (error) falhar(error, "fornecedores");
     return (data ?? []).map((s: any) => ({
       ...s,
       products: undefined,
@@ -53,7 +54,7 @@ export const createSupplier = createServerFn({ method: "POST" })
       })
       .select("id")
       .single();
-    if (error) throw new Error(error.message);
+    if (error) falhar(error, "fornecedores");
     return row;
   });
 
@@ -67,7 +68,7 @@ export const updateSupplier = createServerFn({ method: "POST" })
       .from("suppliers")
       .update(data.patch)
       .eq("id", data.id);
-    if (error) throw new Error(error.message);
+    if (error) falhar(error, "fornecedores");
     return { ok: true };
   });
 
@@ -79,6 +80,6 @@ export const deleteSupplier = createServerFn({ method: "POST" })
       .from("suppliers")
       .update({ deleted_at: new Date().toISOString() })
       .eq("id", data.id);
-    if (error) throw new Error(error.message);
+    if (error) falhar(error, "fornecedores");
     return { ok: true };
   });

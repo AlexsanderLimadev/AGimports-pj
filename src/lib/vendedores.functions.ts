@@ -3,6 +3,7 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { enforceRateLimit } from "@/lib/rate-limit.server";
 import { normalizarNome, resumirPorVendedor } from "@/lib/vendedores-calc";
+import { falhar } from "@/lib/erros.server";
 
 const nomeSchema = z
   .string()
@@ -85,7 +86,7 @@ export const updateVendedor = createServerFn({ method: "POST" })
         .update({ vendedor_nome: patch.nome })
         .eq("vendedor_id", data.id)
         .eq("user_id", context.userId);
-      if (pErr) throw new Error(pErr.message);
+      if (pErr) falhar(pErr, "vendedores");
     }
     return { ok: true };
   });

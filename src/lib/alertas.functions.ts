@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { calcularAlertas, normalizarConfig, type AlertasNegocio } from "@/lib/alertas-calc";
+import { falhar } from "@/lib/erros.server";
 
 export type { AlertasNegocio } from "@/lib/alertas-calc";
 
@@ -25,7 +26,7 @@ export const getAlertasNegocio = createServerFn({ method: "GET" })
         .maybeSingle(),
     ]);
     const erro = prodRes.error ?? pedRes.error ?? itRes.error;
-    if (erro) throw new Error(erro.message);
+    if (erro) falhar(erro, "alertas");
 
     const dataPedido = new Map((pedRes.data ?? []).map((p) => [p.id, p.created_at]));
     const ultimaVenda = new Map<string, string>();

@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import type { ContagemConta } from "@/lib/primeiros-passos-calc";
+import { falhar } from "@/lib/erros.server";
 
 export const getContagemConta = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
@@ -15,7 +16,7 @@ export const getContagemConta = createServerFn({ method: "GET" })
       context.supabase.from("pedidos").select("id", contar).is("deleted_at", null).neq("status", "cancelado"),
     ]);
     const erro = produtos.error ?? comCusto.error ?? clientes.error ?? pedidos.error;
-    if (erro) throw new Error(erro.message);
+    if (erro) falhar(erro, "primeiros-passos");
     return {
       produtos: produtos.count ?? 0,
       produtosComCusto: comCusto.count ?? 0,

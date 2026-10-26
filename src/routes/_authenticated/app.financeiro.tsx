@@ -28,6 +28,7 @@ import {
   deleteLancamento,
   listLancamentos,
 } from "@/lib/financeiro.functions";
+import { avisarComDesfazer } from "@/lib/desfazer";
 
 type Lancamento = {
   id: string;
@@ -90,16 +91,14 @@ function Financeiro() {
       setForm({ ...form, descricao: "", valor: 0, categoria: "" });
       invalidate();
     },
-    onError: (e: Error) => toast.error(e.message),
   });
 
   const del = useMutation({
     mutationFn: (id: string) => deleteLancamento({ data: { id } }),
-    onSuccess: () => {
-      toast.success("Removido");
+    onSuccess: (_d, id) => {
+      avisarComDesfazer("Removido", "financeiro_lancamentos", id, invalidate, qc);
       invalidate();
     },
-    onError: (e: Error) => toast.error(e.message),
   });
 
   function submit() {

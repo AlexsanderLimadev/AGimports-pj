@@ -23,6 +23,7 @@ import {
 import { Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { createMeta, deleteMeta, listMetas } from "@/lib/metas.functions";
+import { avisarComDesfazer } from "@/lib/desfazer";
 
 type Meta = {
   id: string;
@@ -88,16 +89,14 @@ function Metas() {
       setForm({ ...form, nome: "", alvo: 0 });
       invalidate();
     },
-    onError: (e: Error) => toast.error(e.message),
   });
 
   const del = useMutation({
     mutationFn: (id: string) => deleteMeta({ data: { id } }),
-    onSuccess: () => {
-      toast.success("Removida");
+    onSuccess: (_d, id) => {
+      avisarComDesfazer("Removida", "metas", id, invalidate, qc);
       invalidate();
     },
-    onError: (e: Error) => toast.error(e.message),
   });
 
   function submit() {

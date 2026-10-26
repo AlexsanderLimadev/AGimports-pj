@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
+import { falhar } from "@/lib/erros.server";
 
 const calcSchema = z.object({
   nome: z.string().max(160).optional().nullable(),
@@ -20,7 +21,7 @@ export const listCalculos = createServerFn({ method: "GET" })
       .select("*")
       .order("created_at", { ascending: false })
       .limit(50);
-    if (error) throw new Error(error.message);
+    if (error) falhar(error, "calculadora");
     return data ?? [];
   });
 
@@ -33,7 +34,7 @@ export const saveCalculo = createServerFn({ method: "POST" })
       .insert({ ...data, params: data.params as never, user_id: context.userId })
       .select("id")
       .single();
-    if (error) throw new Error(error.message);
+    if (error) falhar(error, "calculadora");
     return row;
   });
 
@@ -45,6 +46,6 @@ export const deleteCalculo = createServerFn({ method: "POST" })
       .from("calculadora_historico")
       .delete()
       .eq("id", data.id);
-    if (error) throw new Error(error.message);
+    if (error) falhar(error, "calculadora");
     return { ok: true };
   });

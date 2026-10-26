@@ -3,6 +3,7 @@ import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { enforceRateLimit } from "@/lib/rate-limit.server";
 import { normalizarConfig, type ConfigAlertas } from "@/lib/alertas-calc";
+import { falhar } from "@/lib/erros.server";
 
 export const getConfigNegocio = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
@@ -44,7 +45,7 @@ export const saveConfigNegocio = createServerFn({ method: "POST" })
       if (error.message.includes("config_negocio")) {
         throw new Error("A tabela de configuração ainda não existe no banco. Rode o SQL 20261023_config_negocio.sql no Supabase.");
       }
-      throw new Error(error.message);
+      falhar(error, "config-negocio");
     }
     return normalizarConfig(data);
   });

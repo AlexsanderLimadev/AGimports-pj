@@ -21,6 +21,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { AvisoOffline } from "@/components/aviso-offline";
 
 
 export const Route = createFileRoute("/_authenticated/app")({
@@ -98,6 +99,7 @@ function AppLayout() {
       <div className="flex min-h-screen w-full bg-background">
         <AppSidebar />
         <SidebarInset className="min-w-0 flex-1">
+          <AvisoOffline />
           <header className="sticky top-0 z-20 flex h-14 items-center gap-3 border-b border-border bg-background/80 px-4 backdrop-blur">
             <SidebarTrigger className="-ml-1" />
             <form onSubmit={handleAppSearch} className="relative hidden max-w-md flex-1 sm:block">

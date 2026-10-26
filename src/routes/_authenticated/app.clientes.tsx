@@ -31,6 +31,8 @@ import {
 import { anonymizeCliente, exportClienteData } from "@/lib/lgpd.functions";
 import { useDebouncedValue, usePagination } from "@/hooks/use-ui";
 import { csvDate, downloadCsv, toCsv } from "@/lib/csv";
+import { avisarComDesfazer } from "@/lib/desfazer";
+import { notificarErro } from "@/lib/notificar-erro";
 
 export const Route = createFileRoute("/_authenticated/app/clientes")({
   head: () => ({
@@ -106,16 +108,14 @@ function Clientes() {
       setOpen(false);
       invalidate();
     },
-    onError: (e: Error) => toast.error(e.message),
   });
 
   const del = useMutation({
     mutationFn: (id: string) => remove({ data: { id } }),
-    onSuccess: () => {
-      toast.success("Cliente removido");
+    onSuccess: (_d, id) => {
+      avisarComDesfazer("Cliente removido", "clientes", id, invalidate, qc);
       invalidate();
     },
-    onError: (e: Error) => toast.error(e.message),
   });
 
   const anon = useMutation({
@@ -124,7 +124,6 @@ function Clientes() {
       toast.success("Dados pessoais anonimizados (LGPD)");
       invalidate();
     },
-    onError: (e: Error) => toast.error(e.message),
   });
 
   function openNew() {
@@ -181,7 +180,7 @@ function Clientes() {
       URL.revokeObjectURL(url);
       toast.success("Dados do titular exportados");
     } catch (e) {
-      toast.error((e as Error).message);
+      notificarErro(e);
     }
   }
 

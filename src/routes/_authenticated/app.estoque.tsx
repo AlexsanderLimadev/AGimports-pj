@@ -170,7 +170,6 @@ function MovementDialog({
       qc.invalidateQueries({ queryKey: ["dashboard-stats"] });
       onClose();
     },
-    onError: (e: Error) => toast.error(e.message),
   });
 
   return (

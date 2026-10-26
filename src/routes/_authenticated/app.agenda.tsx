@@ -28,6 +28,7 @@ import {
   deleteEvento,
   listEventos,
 } from "@/lib/agenda.functions";
+import { avisarComDesfazer } from "@/lib/desfazer";
 
 export const Route = createFileRoute("/_authenticated/app/agenda")({
   head: () => ({ meta: [{ title: "Agenda · AG Tech" }] }),
@@ -113,13 +114,13 @@ function Agenda() {
       setForm({ ...form, titulo: "" });
       invalidate();
     },
-    onError: (e: Error) => toast.error(e.message),
   });
 
   const remove = useMutation({
     mutationFn: (id: string) => deleteEvento({ data: { id } }),
-    onSuccess: () => { toast.success("Removido"); invalidate(); },
-    onError: (e: Error) => toast.error(e.message),
+    onSuccess: (_d, id) => {
+      avisarComDesfazer("Removido", "eventos", id, invalidate, qc);
+      invalidate(); },
   });
 
   const grid = useMemo(() => {

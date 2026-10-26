@@ -2,6 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
 import { enforceRateLimit } from "@/lib/rate-limit.server";
+import { falhar } from "@/lib/erros.server";
 
 const campanhaSchema = z.object({
   nome: z.string().trim().min(1).max(160),
@@ -23,7 +24,7 @@ export const listCampanhas = createServerFn({ method: "GET" })
       .is("deleted_at", null)
       .order("created_at", { ascending: false })
       .limit(500);
-    if (error) throw new Error(error.message);
+    if (error) falhar(error, "marketing");
     return data ?? [];
   });
 
@@ -37,7 +38,7 @@ export const createCampanha = createServerFn({ method: "POST" })
       .insert({ ...data, user_id: context.userId })
       .select("id")
       .single();
-    if (error) throw new Error(error.message);
+    if (error) falhar(error, "marketing");
     return row;
   });
 
@@ -48,7 +49,7 @@ export const updateCampanha = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     const { error } = await context.supabase.from("campanhas").update(data.patch).eq("id", data.id);
-    if (error) throw new Error(error.message);
+    if (error) falhar(error, "marketing");
     return { ok: true };
   });
 
@@ -60,6 +61,6 @@ export const deleteCampanha = createServerFn({ method: "POST" })
       .from("campanhas")
       .update({ deleted_at: new Date().toISOString() })
       .eq("id", data.id);
-    if (error) throw new Error(error.message);
+    if (error) falhar(error, "marketing");
     return { ok: true };
   });

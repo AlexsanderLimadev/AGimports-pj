@@ -29,6 +29,7 @@ import {
   deleteCampanha,
   listCampanhas,
 } from "@/lib/marketing.functions";
+import { avisarComDesfazer } from "@/lib/desfazer";
 
 type Campanha = {
   id: string;
@@ -93,13 +94,13 @@ function Marketing() {
       setForm({ ...form, nome: "", budget: 0, gasto: 0, receita: 0 });
       invalidate();
     },
-    onError: (e: Error) => toast.error(e.message),
   });
 
   const del = useMutation({
     mutationFn: (id: string) => deleteCampanha({ data: { id } }),
-    onSuccess: () => { toast.success("Removida"); invalidate(); },
-    onError: (e: Error) => toast.error(e.message),
+    onSuccess: (_d, id) => {
+      avisarComDesfazer("Removida", "campanhas", id, invalidate, qc);
+      invalidate(); },
   });
 
   function submit() {

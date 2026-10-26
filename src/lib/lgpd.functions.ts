@@ -2,6 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
 import { withCapture } from "@/lib/observability.server";
+import { falhar } from "@/lib/erros.server";
 
 const idInput = (d: unknown) => z.object({ cliente_id: z.string().uuid() }).parse(d);
 
@@ -19,7 +20,7 @@ export const exportClienteData = createServerFn({ method: "GET" })
         .select("*")
         .eq("id", data.cliente_id)
         .single();
-      if (error) throw new Error(error.message);
+      if (error) falhar(error, "lgpd");
 
       const [{ data: pedidos }, { data: itens }, { data: eventos }, { data: lancamentos }] =
         await Promise.all([
@@ -93,21 +94,21 @@ export const anonymizeCliente = createServerFn({ method: "POST" })
           deleted_at: new Date().toISOString(),
         })
         .eq("id", data.cliente_id);
-      if (error) throw new Error(error.message);
+      if (error) falhar(error, "lgpd");
 
       // Remove o nome pessoal congelado nos pedidos, preservando os valores.
       const { error: pErr } = await context.supabase
         .from("pedidos")
         .update({ cliente_nome_snapshot: anonName, notes: null })
         .eq("cliente_id", data.cliente_id);
-      if (pErr) throw new Error(pErr.message);
+      if (pErr) falhar(pErr, "lgpd");
 
       // Remove vínculos pessoais na agenda.
       const { error: eErr } = await context.supabase
         .from("eventos")
         .update({ descricao: null })
         .eq("cliente_id", data.cliente_id);
-      if (eErr) throw new Error(eErr.message);
+      if (eErr) falhar(eErr, "lgpd");
 
       return { ok: true, anonimizado_como: anonName };
     }),

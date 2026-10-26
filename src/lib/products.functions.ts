@@ -2,6 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
 import { enforceRateLimit } from "@/lib/rate-limit.server";
+import { falhar } from "@/lib/erros.server";
 
 // ---------- CATEGORIES ----------
 export const listCategories = createServerFn({ method: "GET" })
@@ -11,7 +12,7 @@ export const listCategories = createServerFn({ method: "GET" })
       .from("categories")
       .select("id, name")
       .order("name");
-    if (error) throw new Error(error.message);
+    if (error) falhar(error, "products");
     return data ?? [];
   });
 
@@ -25,7 +26,7 @@ export const createCategory = createServerFn({ method: "POST" })
       .insert({ name: data.name, user_id: context.userId })
       .select("id, name")
       .single();
-    if (error) throw new Error(error.message);
+    if (error) falhar(error, "products");
     return row;
   });
 
@@ -37,7 +38,7 @@ export const listSuppliers = createServerFn({ method: "GET" })
       .from("suppliers")
       .select("id, name")
       .order("name");
-    if (error) throw new Error(error.message);
+    if (error) falhar(error, "products");
     return data ?? [];
   });
 
@@ -68,7 +69,7 @@ export const listProducts = createServerFn({ method: "GET" })
       .is("deleted_at", null)
       .order("created_at", { ascending: false })
       .limit(500);
-    if (error) throw new Error(error.message);
+    if (error) falhar(error, "products");
     return data ?? [];
   });
 
@@ -83,7 +84,7 @@ export const createProduct = createServerFn({ method: "POST" })
       .insert(payload)
       .select("id")
       .single();
-    if (error) throw new Error(error.message);
+    if (error) falhar(error, "products");
     return row;
   });
 
@@ -99,7 +100,7 @@ export const updateProduct = createServerFn({ method: "POST" })
       .from("products")
       .update(patch)
       .eq("id", data.id);
-    if (error) throw new Error(error.message);
+    if (error) falhar(error, "products");
     return { ok: true };
   });
 
@@ -111,7 +112,7 @@ export const deleteProduct = createServerFn({ method: "POST" })
       .from("products")
       .update({ deleted_at: new Date().toISOString() })
       .eq("id", data.id);
-    if (error) throw new Error(error.message);
+    if (error) falhar(error, "products");
     return { ok: true };
   });
 
@@ -124,7 +125,7 @@ export const listMovements = createServerFn({ method: "GET" })
       .select("id, product_id, move_type, qty, note, created_at, products(name, sku)")
       .order("created_at", { ascending: false })
       .limit(100);
-    if (error) throw new Error(error.message);
+    if (error) falhar(error, "products");
     return data ?? [];
   });
 
@@ -145,7 +146,7 @@ export const createMovement = createServerFn({ method: "POST" })
     const { error } = await context.supabase
       .from("stock_movements")
       .insert({ ...data, user_id: context.userId });
-    if (error) throw new Error(error.message);
+    if (error) falhar(error, "products");
     return { ok: true };
   });
 
@@ -157,7 +158,7 @@ export const dashboardStats = createServerFn({ method: "GET" })
       .from("products")
       .select("cost_cents, price_cents, stock_qty, min_stock, active")
       .is("deleted_at", null);
-    if (error) throw new Error(error.message);
+    if (error) falhar(error, "products");
 
 
     const list = products ?? [];

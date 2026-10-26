@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { resumirClientes, type ClienteResumo } from "@/lib/clientes-sumidos-calc";
+import { falhar } from "@/lib/erros.server";
 
 export type ClientesCompradores = { compradores: ClienteResumo[]; semCompra: number };
 
@@ -17,6 +18,6 @@ export const getClientesCompradores = createServerFn({ method: "GET" })
         .not("cliente_id", "is", null),
     ]);
     const erro = cliRes.error ?? pedRes.error;
-    if (erro) throw new Error(erro.message);
+    if (erro) falhar(erro, "clientes-sumidos");
     return resumirClientes(cliRes.data ?? [], pedRes.data ?? []);
   });
