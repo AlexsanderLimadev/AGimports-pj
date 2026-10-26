@@ -8,6 +8,7 @@ import { toCsv, downloadCsv, csvDate, csvMoney } from "@/lib/csv";
 import { listPedidos } from "@/lib/pedidos.functions";
 import { listLancamentos } from "@/lib/financeiro.functions";
 import { listClientes } from "@/lib/clientes.functions";
+import { notificarErro } from "@/lib/notificar-erro";
 
 export const Route = createFileRoute("/_authenticated/app/relatorios")({
   head: () => ({ meta: [{ title: "Relatórios · AG Tech" }] }),
@@ -34,7 +35,7 @@ function Rel() {
       await run();
       toast.success(`${nome} exportado`);
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Falha ao exportar");
+      notificarErro(e);
     } finally {
       setLoading(null);
     }

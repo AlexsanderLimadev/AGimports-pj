@@ -19,6 +19,7 @@ import {
 import { AlertasConfig } from "@/components/alertas-config";
 import { supabase } from "@/integrations/supabase/client";
 import { listAccessLogs } from "@/lib/access-log.functions";
+import { notificarErro } from "@/lib/notificar-erro";
 
 export const Route = createFileRoute("/_authenticated/app/configuracoes")({
   head: () => ({ meta: [{ title: "Configurações · AG Tech" }] }),
@@ -71,7 +72,7 @@ function Conf() {
       if (error) throw error;
       toast.success("Enviamos um link para o seu e-mail. Verifique também o spam.");
     } catch (e) {
-      toast.error(e instanceof Error ? e.message : "Não foi possível enviar o link.");
+      notificarErro(e);
     } finally {
       setEnviandoSenha(false);
     }
@@ -85,7 +86,7 @@ function Conf() {
       navigate({ to: "/auth", replace: true });
     } catch (e) {
       setSaindo(false);
-      toast.error(e instanceof Error ? e.message : "Não foi possível sair de todos os dispositivos.");
+      notificarErro(e);
     }
   }
 

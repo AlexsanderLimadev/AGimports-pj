@@ -3,6 +3,7 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
 import { enforceRateLimit } from "@/lib/rate-limit.server";
 import { withCapture } from "@/lib/observability.server";
+import { falhar } from "@/lib/erros.server";
 
 
 const finSchema = z.object({
@@ -30,7 +31,7 @@ export const listLancamentos = createServerFn({ method: "GET" })
     if (data.from) q = q.gte("data", data.from);
     if (data.to) q = q.lte("data", data.to);
     const { data: rows, error } = await q;
-    if (error) throw new Error(error.message);
+    if (error) falhar(error, "financeiro");
     return rows ?? [];
   });
 
@@ -45,7 +46,7 @@ export const createLancamento = createServerFn({ method: "POST" })
         .insert({ ...data, user_id: context.userId })
         .select("id")
         .single();
-      if (error) throw new Error(error.message);
+      if (error) falhar(error, "financeiro");
       return row;
     });
   });
@@ -61,7 +62,7 @@ export const updateLancamento = createServerFn({ method: "POST" })
       .from("financeiro_lancamentos")
       .update(data.patch)
       .eq("id", data.id);
-    if (error) throw new Error(error.message);
+    if (error) falhar(error, "financeiro");
     return { ok: true };
   });
 
@@ -73,6 +74,6 @@ export const deleteLancamento = createServerFn({ method: "POST" })
       .from("financeiro_lancamentos")
       .update({ deleted_at: new Date().toISOString() })
       .eq("id", data.id);
-    if (error) throw new Error(error.message);
+    if (error) falhar(error, "financeiro");
     return { ok: true };
   });

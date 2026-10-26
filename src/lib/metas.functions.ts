@@ -2,6 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
 import { enforceRateLimit } from "@/lib/rate-limit.server";
+import { falhar } from "@/lib/erros.server";
 
 const META_TIPOS = ["faturamento", "pedidos", "clientes", "lucro", "ticket_medio"] as const;
 const META_PERIODOS = ["mes", "trimestre", "ano"] as const;
@@ -32,7 +33,7 @@ export const listMetas = createServerFn({ method: "GET" })
       .is("deleted_at", null)
       .order("created_at", { ascending: false })
       .limit(200);
-    if (error) throw new Error(error.message);
+    if (error) falhar(error, "metas");
 
 
     // Compute atual dynamically from real data
@@ -93,7 +94,7 @@ export const createMeta = createServerFn({ method: "POST" })
       .insert({ ...data, user_id: context.userId, atual: 0 })
       .select("id")
       .single();
-    if (error) throw new Error(error.message);
+    if (error) falhar(error, "metas");
     return row;
   });
 
@@ -104,7 +105,7 @@ export const updateMeta = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     const { error } = await context.supabase.from("metas").update(data.patch).eq("id", data.id);
-    if (error) throw new Error(error.message);
+    if (error) falhar(error, "metas");
     return { ok: true };
   });
 
@@ -116,6 +117,6 @@ export const deleteMeta = createServerFn({ method: "POST" })
       .from("metas")
       .update({ deleted_at: new Date().toISOString() })
       .eq("id", data.id);
-    if (error) throw new Error(error.message);
+    if (error) falhar(error, "metas");
     return { ok: true };
   });

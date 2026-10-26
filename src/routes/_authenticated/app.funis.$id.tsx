@@ -14,6 +14,7 @@ import { toast } from "sonner";
 import {
   addEtapa, deleteEtapa, deleteFunil, getFunil, updateEtapa, updateFunil,
 } from "@/lib/funis.functions";
+import { notificarErro } from "@/lib/notificar-erro";
 
 export const Route = createFileRoute("/_authenticated/app/funis/$id")({
   head: () => ({ meta: [{ title: `Funil · AG Tech` }] }),
@@ -48,7 +49,7 @@ function Editor() {
     try {
       const res = await getFn({ data: { id } });
       setF(res as Funil);
-    } catch (e) { toast.error((e as Error).message); }
+    } catch (e) { notificarErro(e); }
     finally { setLoading(false); }
   }, [getFn, id]);
 
@@ -117,12 +118,12 @@ function Editor() {
       setEditingId(null);
       setForm(EMPTY_FORM);
       reload();
-    } catch (e) { toast.error((e as Error).message); }
+    } catch (e) { notificarErro(e); }
   }
 
   async function removeEtapa(eid: string) {
     try { await delEtapaFn({ data: { id: eid } }); toast.success("Removida"); reload(); }
-    catch (e) { toast.error((e as Error).message); }
+    catch (e) { notificarErro(e); }
   }
 
   async function removeFunil() {
@@ -131,7 +132,7 @@ function Editor() {
       await delFunilFn({ data: { id: f!.id } });
       toast.success("Funil removido");
       navigate({ to: "/app/funis" });
-    } catch (e) { toast.error((e as Error).message); }
+    } catch (e) { notificarErro(e); }
   }
 
   async function saveRename() {
@@ -141,7 +142,7 @@ function Editor() {
       setRenaming(false);
       toast.success("Renomeado");
       reload();
-    } catch (e) { toast.error((e as Error).message); }
+    } catch (e) { notificarErro(e); }
   }
 
   return (

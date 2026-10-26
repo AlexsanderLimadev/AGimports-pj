@@ -2,6 +2,8 @@ import { MutationCache, QueryClient } from "@tanstack/react-query";
 import { createRouter } from "@tanstack/react-router";
 import { routeTree } from "./routeTree.gen";
 import { Shimmer } from "@/components/ui-bits";
+import { TELAS_DERIVADAS } from "@/lib/telas-derivadas";
+import { notificarErro } from "@/lib/notificar-erro";
 
 /** Aparece quase na hora ao clicar, enquanto a página nova carrega. */
 function PaginaCarregando() {
@@ -20,8 +22,6 @@ function PaginaCarregando() {
   );
 }
 
-/** Telas que somam dados de vários módulos: precisam refazer após qualquer alteração. */
-const TELAS_DERIVADAS = ["clientes-sumidos", "dashboard-stats", "bi-overview", "metricas-negocio", "analise-negocio", "alertas-negocio", "primeiros-passos"];
 
 export const getRouter = () => {
   const queryClient: QueryClient = new QueryClient({
@@ -29,6 +29,8 @@ export const getRouter = () => {
       onSuccess: () => {
         for (const chave of TELAS_DERIVADAS) queryClient.invalidateQueries({ queryKey: [chave] });
       },
+      // Todo erro de gravação vira aviso em português com código de referência.
+      onError: (error) => notificarErro(error),
     }),
     defaultOptions: {
       queries: {

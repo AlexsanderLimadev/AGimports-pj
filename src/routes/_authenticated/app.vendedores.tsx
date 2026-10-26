@@ -22,6 +22,7 @@ import { Switch } from "@/components/ui/switch";
 import { brl } from "@/lib/mock/data";
 import { createVendedor, deleteVendedor, listVendedores, updateVendedor } from "@/lib/vendedores.functions";
 import { normalizarNome } from "@/lib/vendedores-calc";
+import { avisarComDesfazer } from "@/lib/desfazer";
 
 type Vendedor = Awaited<ReturnType<typeof listVendedores>>[number];
 
@@ -68,23 +69,20 @@ function Vendedores() {
       fechar();
       invalidate();
     },
-    onError: (e: Error) => toast.error(e.message),
   });
 
   const alternar = useMutation({
     mutationFn: (v: Vendedor) => updateVendedor({ data: { id: v.id, ativo: !v.ativo } }),
     onSuccess: invalidate,
-    onError: (e: Error) => toast.error(e.message),
   });
 
   const remover = useMutation({
     mutationFn: (id: string) => deleteVendedor({ data: { id } }),
-    onSuccess: () => {
-      toast.success("Vendedor removido");
+    onSuccess: (_d, id) => {
+      avisarComDesfazer("Vendedor removido", "vendedores", id, invalidate, qc);
       setApagar(null);
       invalidate();
     },
-    onError: (e: Error) => toast.error(e.message),
   });
 
   const ativos = rows.filter((r) => r.ativo).length;

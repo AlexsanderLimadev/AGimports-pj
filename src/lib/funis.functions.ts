@@ -2,6 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
 import { enforceRateLimit } from "@/lib/rate-limit.server";
+import { falhar } from "@/lib/erros.server";
 
 const PALETTE = [
   "var(--color-chart-1)",
@@ -44,7 +45,7 @@ export const listFunis = createServerFn({ method: "GET" })
       .is("deleted_at", null)
       .order("created_at", { ascending: false })
       .limit(200);
-    if (error) throw new Error(error.message);
+    if (error) falhar(error, "funis");
     return (funis ?? []).map((f) => ({
       ...f,
       etapas: (f.funil_etapas ?? []).sort(
@@ -62,7 +63,7 @@ export const getFunil = createServerFn({ method: "GET" })
       .select("id, nome, slug")
       .eq("id", data.id)
       .single();
-    if (error) throw new Error(error.message);
+    if (error) falhar(error, "funis");
     const { data: etapas } = await context.supabase
       .from("funil_etapas")
       .select("id, ordem, nome, pessoas, conv, valor_cents, cor")
@@ -92,7 +93,7 @@ export const createFunil = createServerFn({ method: "POST" })
       .insert({ user_id: context.userId, nome: data.nome, slug })
       .select("id, slug")
       .single();
-    if (error) throw new Error(error.message);
+    if (error) falhar(error, "funis");
     if (data.etapas.length) {
       const rows = data.etapas.map((e, i) => ({
         user_id: context.userId,
@@ -105,7 +106,7 @@ export const createFunil = createServerFn({ method: "POST" })
         cor: e.cor ?? nextColor(i),
       }));
       const { error: eErr } = await context.supabase.from("funil_etapas").insert(rows);
-      if (eErr) throw new Error(eErr.message);
+      if (eErr) falhar(eErr, "funis");
     }
     return funil;
   });
@@ -120,7 +121,7 @@ export const updateFunil = createServerFn({ method: "POST" })
       .from("funis")
       .update({ nome: data.nome })
       .eq("id", data.id);
-    if (error) throw new Error(error.message);
+    if (error) falhar(error, "funis");
     return { ok: true };
   });
 
@@ -132,7 +133,7 @@ export const deleteFunil = createServerFn({ method: "POST" })
       .from("funis")
       .update({ deleted_at: new Date().toISOString() })
       .eq("id", data.id);
-    if (error) throw new Error(error.message);
+    if (error) falhar(error, "funis");
     return { ok: true };
   });
 
@@ -157,7 +158,7 @@ export const addEtapa = createServerFn({ method: "POST" })
       valor_cents: data.etapa.valor_cents,
       cor: data.etapa.cor ?? nextColor(ordem),
     });
-    if (error) throw new Error(error.message);
+    if (error) falhar(error, "funis");
     return { ok: true };
   });
 
@@ -171,7 +172,7 @@ export const updateEtapa = createServerFn({ method: "POST" })
       .from("funil_etapas")
       .update(data.patch)
       .eq("id", data.id);
-    if (error) throw new Error(error.message);
+    if (error) falhar(error, "funis");
     return { ok: true };
   });
 
@@ -180,6 +181,6 @@ export const deleteEtapa = createServerFn({ method: "POST" })
   .validator((d: unknown) => z.object({ id: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
     const { error } = await context.supabase.from("funil_etapas").delete().eq("id", data.id);
-    if (error) throw new Error(error.message);
+    if (error) falhar(error, "funis");
     return { ok: true };
   });

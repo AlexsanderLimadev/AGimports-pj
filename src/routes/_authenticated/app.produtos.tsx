@@ -43,6 +43,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { avisarComDesfazer } from "@/lib/desfazer";
 
 const productsOptions = queryOptions({ queryKey: ["products"], queryFn: () => listProducts() });
 const categoriesOptions = queryOptions({ queryKey: ["categories"], queryFn: () => listCategories() });
@@ -113,12 +114,12 @@ function ProdutosPage() {
 
   const del = useMutation({
     mutationFn: (id: string) => deleteProduct({ data: { id } }),
-    onSuccess: () => {
-      toast.success("Produto excluído");
+    onSuccess: (_d, id) => {
+      avisarComDesfazer("Produto excluído", "products", id, invalidate, qc);
+      setDeleting(null);
       invalidate();
       setDeleting(null);
     },
-    onError: (e: Error) => toast.error(e.message),
   });
 
   return (
@@ -337,7 +338,6 @@ function ProductDialog({
       onSaved();
       onClose();
     },
-    onError: (e: Error) => toast.error(e.message),
   });
 
   return (

@@ -11,6 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { createFunil, deleteFunil, listFunis } from "@/lib/funis.functions";
+import { avisarComDesfazer } from "@/lib/desfazer";
 
 type Etapa = { id: string; ordem: number; nome: string; pessoas: number; conv: number; valor_cents: number; cor: string | null };
 type Funil = { id: string; nome: string; slug: string; etapas: Etapa[] };
@@ -66,13 +67,13 @@ function Funis() {
       invalidate();
       navigate({ to: "/app/funis/$id", params: { id: res.id } });
     },
-    onError: (e: Error) => toast.error(e.message),
   });
 
   const del = useMutation({
     mutationFn: (id: string) => deleteFunil({ data: { id } }),
-    onSuccess: () => { toast.success("Removido"); invalidate(); },
-    onError: (e: Error) => toast.error(e.message),
+    onSuccess: (_d, id) => {
+      avisarComDesfazer("Removido", "funis", id, invalidate, qc);
+      invalidate(); },
   });
 
   function createFunnel(template?: string) {

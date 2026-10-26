@@ -2,6 +2,7 @@ import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
 import { enforceRateLimit } from "@/lib/rate-limit.server";
+import { falhar } from "@/lib/erros.server";
 
 const automacaoSchema = z.object({
   nome: z.string().trim().min(1).max(160),
@@ -20,7 +21,7 @@ export const listAutomacoes = createServerFn({ method: "GET" })
       .is("deleted_at", null)
       .order("created_at", { ascending: false })
       .limit(200);
-    if (error) throw new Error(error.message);
+    if (error) falhar(error, "automacoes");
     return data ?? [];
   });
 
@@ -34,7 +35,7 @@ export const createAutomacao = createServerFn({ method: "POST" })
       .insert({ ...data, config: data.config as never, user_id: context.userId })
       .select("id")
       .single();
-    if (error) throw new Error(error.message);
+    if (error) falhar(error, "automacoes");
     return row;
   });
 
@@ -48,7 +49,7 @@ export const toggleAutomacao = createServerFn({ method: "POST" })
       .from("automacoes")
       .update({ ativo: data.ativo })
       .eq("id", data.id);
-    if (error) throw new Error(error.message);
+    if (error) falhar(error, "automacoes");
     return { ok: true };
   });
 
@@ -62,7 +63,7 @@ export const updateAutomacao = createServerFn({ method: "POST" })
       .from("automacoes")
       .update(data.patch as never)
       .eq("id", data.id);
-    if (error) throw new Error(error.message);
+    if (error) falhar(error, "automacoes");
     return { ok: true };
   });
 
@@ -74,6 +75,6 @@ export const deleteAutomacao = createServerFn({ method: "POST" })
       .from("automacoes")
       .update({ deleted_at: new Date().toISOString() })
       .eq("id", data.id);
-    if (error) throw new Error(error.message);
+    if (error) falhar(error, "automacoes");
     return { ok: true };
   });

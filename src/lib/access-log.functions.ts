@@ -1,6 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
+import { falhar } from "@/lib/erros.server";
 
 const eventSchema = z.enum(["sign_in", "sign_out", "sign_up", "password_reset"]);
 
@@ -33,6 +34,6 @@ export const listAccessLogs = createServerFn({ method: "GET" })
       .select("id, event, user_agent, created_at")
       .order("created_at", { ascending: false })
       .limit(50);
-    if (error) throw new Error(error.message);
+    if (error) falhar(error, "access-log");
     return data ?? [];
   });

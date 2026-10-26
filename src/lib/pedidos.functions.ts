@@ -4,6 +4,7 @@ import { z } from "zod";
 import { resolveItens, totalCents } from "@/lib/pedidos-calc";
 import { enforceRateLimit } from "@/lib/rate-limit.server";
 import { withCapture } from "@/lib/observability.server";
+import { falhar } from "@/lib/erros.server";
 
 
 
@@ -28,7 +29,7 @@ export const listPedidos = createServerFn({ method: "GET" })
       .is("deleted_at", null)
       .order("created_at", { ascending: false })
       .limit(500);
-    if (error) throw new Error(error.message);
+    if (error) falhar(error, "pedidos");
     return data ?? [];
   });
 
@@ -41,7 +42,7 @@ export const getPedido = createServerFn({ method: "GET" })
       .select("*")
       .eq("id", data.id)
       .single();
-    if (error) throw new Error(error.message);
+    if (error) falhar(error, "pedidos");
     const { data: itens } = await context.supabase
       .from("pedido_itens")
       .select("id, product_id, descricao_snapshot, qty, unit_price_cents, subtotal_cents")
@@ -79,7 +80,7 @@ export const createPedido = createServerFn({ method: "POST" })
           .select("id, price_cents, name, sku")
           .in("id", productIds)
           .is("deleted_at", null);
-        if (pErr) throw new Error(pErr.message);
+        if (pErr) falhar(pErr, "pedidos");
         for (const p of prods ?? []) {
           priceMap.set(p.id, { price_cents: p.price_cents, name: p.name, sku: p.sku });
         }
@@ -99,7 +100,7 @@ export const createPedido = createServerFn({ method: "POST" })
           .eq("user_id", context.userId)
           .is("deleted_at", null)
           .maybeSingle();
-        if (vErr) throw new Error(vErr.message);
+        if (vErr) falhar(vErr, "pedidos");
         if (!vend) throw new Error("Vendedor não encontrado. Atualize a página e tente de novo.");
         vendedorNome = vend.nome;
       }
@@ -122,7 +123,7 @@ export const createPedido = createServerFn({ method: "POST" })
         })
         .select("id, numero")
         .single();
-      if (error) throw new Error(error.message);
+      if (error) falhar(error, "pedidos");
 
       const rows = resolvedItens.map((it) => ({
         user_id: context.userId,
@@ -134,7 +135,7 @@ export const createPedido = createServerFn({ method: "POST" })
         subtotal_cents: it.qty * it.unit_price_cents,
       }));
       const { error: iErr } = await context.supabase.from("pedido_itens").insert(rows);
-      if (iErr) throw new Error(iErr.message);
+      if (iErr) falhar(iErr, "pedidos");
       return pedido;
     });
   });
@@ -150,7 +151,7 @@ export const updatePedidoStatus = createServerFn({ method: "POST" })
       .from("pedidos")
       .update({ status: data.status })
       .eq("id", data.id);
-    if (error) throw new Error(error.message);
+    if (error) falhar(error, "pedidos");
     return { ok: true };
   });
 
@@ -162,6 +163,6 @@ export const deletePedido = createServerFn({ method: "POST" })
       .from("pedidos")
       .update({ deleted_at: new Date().toISOString() })
       .eq("id", data.id);
-    if (error) throw new Error(error.message);
+    if (error) falhar(error, "pedidos");
     return { ok: true };
   });

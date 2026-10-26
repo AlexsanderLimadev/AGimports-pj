@@ -30,6 +30,7 @@ import {
   listPedidos,
   updatePedidoStatus,
 } from "@/lib/pedidos.functions";
+import { avisarComDesfazer } from "@/lib/desfazer";
 
 const STATUS = ["novo", "separacao", "expedicao", "entregue", "cancelado"] as const;
 const STATUS_LABEL: Record<(typeof STATUS)[number], string> = {
@@ -102,7 +103,6 @@ function Pedidos() {
       setForm({ cliente: "", vendedor_id: "", descricao: "", qty: 1, unit: 0, canal: "site", status: "novo" });
       invalidate();
     },
-    onError: (e: Error) => toast.error(e.message),
   });
 
   const move = useMutation({
@@ -116,8 +116,7 @@ function Pedidos() {
       );
       return { previous };
     },
-    onError: (e: Error, _vars, ctx) => {
-      toast.error(e.message);
+    onError: (_e: Error, _vars, ctx) => {
       if (ctx?.previous) qc.setQueryData(pedidosOptions.queryKey, ctx.previous);
     },
     onSettled: invalidate,
@@ -125,11 +124,10 @@ function Pedidos() {
 
   const del = useMutation({
     mutationFn: (id: string) => deletePedido({ data: { id } }),
-    onSuccess: () => {
-      toast.success("Removido");
+    onSuccess: (_d, id) => {
+      avisarComDesfazer("Removido", "pedidos", id, invalidate, qc);
       invalidate();
     },
-    onError: (e: Error) => toast.error(e.message),
   });
 
   function submit() {

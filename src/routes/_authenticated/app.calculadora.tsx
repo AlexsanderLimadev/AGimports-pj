@@ -117,13 +117,11 @@ function Calc() {
       setNome("");
       invalidate();
     },
-    onError: (e: Error) => toast.error(e.message),
   });
 
   const remove = useMutation({
     mutationFn: (id: string) => deleteCalculo({ data: { id } }),
     onSuccess: () => { toast.success("Removido"); invalidate(); },
-    onError: (e: Error) => toast.error(e.message),
   });
 
   const r = useMemo(() => {

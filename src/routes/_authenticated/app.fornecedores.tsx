@@ -23,6 +23,7 @@ import {
   listSuppliers,
   updateSupplier,
 } from "@/lib/fornecedores.functions";
+import { avisarComDesfazer } from "@/lib/desfazer";
 
 type Supplier = {
   id: string;
@@ -65,7 +66,6 @@ function Fornecedores() {
       close();
       invalidate();
     },
-    onError: (e: Error) => toast.error(e.message),
   });
 
   const update = useMutation({
@@ -75,16 +75,14 @@ function Fornecedores() {
       close();
       invalidate();
     },
-    onError: (e: Error) => toast.error(e.message),
   });
 
   const del = useMutation({
     mutationFn: (id: string) => deleteSupplier({ data: { id } }),
-    onSuccess: () => {
-      toast.success("Removido");
+    onSuccess: (_d, id) => {
+      avisarComDesfazer("Removido", "suppliers", id, invalidate, qc);
       invalidate();
     },
-    onError: (e: Error) => toast.error(e.message),
   });
 
   function openNew() {

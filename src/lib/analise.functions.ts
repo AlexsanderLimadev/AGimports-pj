@@ -8,6 +8,7 @@ export type {
   ProdutoVendas,
   VendedorRank,
 } from "@/lib/analise-calc";
+import { falhar } from "@/lib/erros.server";
 
 export const getAnaliseNegocio = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
@@ -28,7 +29,7 @@ export const getAnaliseNegocio = createServerFn({ method: "GET" })
         .select("pedido_id, product_id, descricao_snapshot, qty, subtotal_cents"),
     ]);
     const erro = prodRes.error ?? pedRes.error ?? itRes.error;
-    if (erro) throw new Error(erro.message);
+    if (erro) falhar(erro, "analise");
 
     return calcularAnalise(prodRes.data ?? [], pedRes.data ?? [], itRes.data ?? []);
   });

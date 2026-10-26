@@ -3,6 +3,7 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
 import { enforceRateLimit } from "@/lib/rate-limit.server";
 import { withCapture } from "@/lib/observability.server";
+import { falhar } from "@/lib/erros.server";
 
 
 export const clienteSchema = z.object({
@@ -23,7 +24,7 @@ export const listClientes = createServerFn({ method: "GET" })
       .is("deleted_at", null)
       .order("created_at", { ascending: false })
       .limit(500);
-    if (error) throw new Error(error.message);
+    if (error) falhar(error, "clientes");
     return data ?? [];
   });
 
@@ -36,7 +37,7 @@ export const getCliente = createServerFn({ method: "GET" })
       .select("*")
       .eq("id", data.id)
       .single();
-    if (error) throw new Error(error.message);
+    if (error) falhar(error, "clientes");
     const { data: pedidos } = await context.supabase
       .from("pedidos")
       .select("id, numero, status, canal, total_cents, created_at")
@@ -56,7 +57,7 @@ export const createCliente = createServerFn({ method: "POST" })
         .insert({ ...data, user_id: context.userId })
         .select("id")
         .single();
-      if (error) throw new Error(error.message);
+      if (error) falhar(error, "clientes");
       return row;
     });
   });
@@ -69,7 +70,7 @@ export const updateCliente = createServerFn({ method: "POST" })
   )
   .handler(async ({ data, context }) => {
     const { error } = await context.supabase.from("clientes").update(data.patch).eq("id", data.id);
-    if (error) throw new Error(error.message);
+    if (error) falhar(error, "clientes");
     return { ok: true };
   });
 
@@ -81,6 +82,6 @@ export const deleteCliente = createServerFn({ method: "POST" })
       .from("clientes")
       .update({ deleted_at: new Date().toISOString() })
       .eq("id", data.id);
-    if (error) throw new Error(error.message);
+    if (error) falhar(error, "clientes");
     return { ok: true };
   });

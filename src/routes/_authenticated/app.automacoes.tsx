@@ -22,6 +22,7 @@ import {
   listAutomacoes,
   toggleAutomacao,
 } from "@/lib/automacoes.functions";
+import { avisarComDesfazer } from "@/lib/desfazer";
 
 type Automacao = {
   id: string;
@@ -58,7 +59,6 @@ function Auto() {
       setForm({ nome: "", gatilho: "", acao: "" });
       invalidate();
     },
-    onError: (e: Error) => toast.error(e.message),
   });
 
   const toggle = useMutation({
@@ -71,8 +71,7 @@ function Auto() {
       );
       return { previous };
     },
-    onError: (e: Error, _v, ctx) => {
-      toast.error(e.message);
+    onError: (_e: Error, _v, ctx) => {
       if (ctx?.previous) qc.setQueryData(automacoesOptions.queryKey, ctx.previous);
     },
     onSettled: invalidate,
@@ -80,11 +79,10 @@ function Auto() {
 
   const del = useMutation({
     mutationFn: (id: string) => deleteAutomacao({ data: { id } }),
-    onSuccess: () => {
-      toast.success("Removida");
+    onSuccess: (_d, id) => {
+      avisarComDesfazer("Removida", "automacoes", id, invalidate, qc);
       invalidate();
     },
-    onError: (e: Error) => toast.error(e.message),
   });
 
   function submit() {
