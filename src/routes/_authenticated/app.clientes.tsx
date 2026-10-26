@@ -33,6 +33,9 @@ import { useDebouncedValue, usePagination } from "@/hooks/use-ui";
 import { csvDate, downloadCsv, toCsv } from "@/lib/csv";
 import { avisarComDesfazer } from "@/lib/desfazer";
 import { notificarErro } from "@/lib/notificar-erro";
+import { clienteSchema } from "@/lib/clientes.functions";
+import { errosPorCampo } from "@/lib/campos";
+import { ErroCampo, bordaErro } from "@/components/campo-erro";
 
 export const Route = createFileRoute("/_authenticated/app/clientes")({
   head: () => ({
@@ -78,6 +81,7 @@ function Clientes() {
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<Cliente | null>(null);
   const [form, setForm] = useState({ nome: "", email: "", telefone: "", documento: "", notes: "" });
+  const [erros, setErros] = useState<Record<string, string>>({});
   const [q, setQ] = useState("");
   const term = useDebouncedValue(q).trim().toLowerCase();
 
@@ -129,6 +133,7 @@ function Clientes() {
   function openNew() {
     setEditing(null);
     setForm({ nome: "", email: "", telefone: "", documento: "", notes: "" });
+    setErros({});
     setOpen(true);
   }
   function openEdit(c: Cliente) {
@@ -140,19 +145,23 @@ function Clientes() {
       documento: c.documento ?? "",
       notes: c.notes ?? "",
     });
+    setErros({});
     setOpen(true);
   }
 
   function submit() {
-    if (!form.nome.trim()) return toast.error("Nome obrigatório");
-    save.mutate({
+    const payload = {
       nome: form.nome.trim(),
-      email: form.email || null,
+      email: form.email.trim() || null,
       telefone: form.telefone || null,
       documento: form.documento || null,
       notes: form.notes || null,
       tags: [],
-    });
+    };
+    const e = errosPorCampo(clienteSchema, payload);
+    setErros(e);
+    if (Object.keys(e).length > 0) return;
+    save.mutate(payload);
   }
 
   function exportCsv() {
@@ -342,15 +351,24 @@ function Clientes() {
           <div className="grid gap-3">
             <div className="grid gap-1.5">
               <Label>Nome</Label>
-              <Input value={form.nome} onChange={(e) => setForm({ ...form, nome: e.target.value })} />
+              <Input
+                value={form.nome}
+                aria-invalid={!!erros.nome}
+                className={bordaErro(erros.nome)}
+                onChange={(e) => setForm({ ...form, nome: e.target.value })}
+              />
+              <ErroCampo mensagem={erros.nome} />
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div className="grid gap-1.5">
                 <Label>E-mail</Label>
                 <Input
                   value={form.email}
+                  aria-invalid={!!erros.email}
+                  className={bordaErro(erros.email)}
                   onChange={(e) => setForm({ ...form, email: e.target.value })}
                 />
+                <ErroCampo mensagem={erros.email} />
               </div>
               <div className="grid gap-1.5">
                 <Label>Telefone</Label>

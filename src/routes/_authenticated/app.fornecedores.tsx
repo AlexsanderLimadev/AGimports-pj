@@ -24,6 +24,9 @@ import {
   updateSupplier,
 } from "@/lib/fornecedores.functions";
 import { avisarComDesfazer } from "@/lib/desfazer";
+import { supplierSchema } from "@/lib/fornecedores.functions";
+import { errosPorCampo } from "@/lib/campos";
+import { ErroCampo, bordaErro } from "@/components/campo-erro";
 
 type Supplier = {
   id: string;
@@ -58,6 +61,7 @@ function Fornecedores() {
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<Supplier | null>(null);
   const [form, setForm] = useState(EMPTY_FORM);
+  const [erros, setErros] = useState<Record<string, string>>({});
 
   const create = useMutation({
     mutationFn: () => createSupplier({ data: form }),
@@ -105,13 +109,23 @@ function Fornecedores() {
   }
 
   function close() {
+    setErros({});
     setOpen(false);
     setEditing(null);
     setForm(EMPTY_FORM);
   }
 
   function submit() {
-    if (!form.name.trim()) return toast.error("Informe o nome do fornecedor");
+    const e = errosPorCampo(supplierSchema, {
+      name: form.name.trim(),
+      contact_name: form.contact_name || null,
+      phone: form.phone || null,
+      email: form.email.trim() || null,
+      notes: form.notes || null,
+      is_international: form.is_international,
+    });
+    setErros(e);
+    if (Object.keys(e).length > 0) return;
     if (editing) update.mutate();
     else create.mutate();
   }
@@ -139,13 +153,14 @@ function Fornecedores() {
               <div className="grid gap-3">
                 <div className="grid gap-1.5">
                   <Label>Nome</Label>
-                  <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Nome do fornecedor" />
+                  <Input value={form.name} aria-invalid={!!erros.name} className={bordaErro(erros.name)} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Nome do fornecedor" />
+                  <ErroCampo mensagem={erros.name} />
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div className="grid gap-1.5"><Label>Contato</Label><Input value={form.contact_name} onChange={(e) => setForm({ ...form, contact_name: e.target.value })} /></div>
                   <div className="grid gap-1.5"><Label>Telefone</Label><Input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} /></div>
                 </div>
-                <div className="grid gap-1.5"><Label>E-mail</Label><Input value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} /></div>
+                <div className="grid gap-1.5"><Label>E-mail</Label><Input value={form.email} aria-invalid={!!erros.email} className={bordaErro(erros.email)} onChange={(e) => setForm({ ...form, email: e.target.value })} /><ErroCampo mensagem={erros.email} /></div>
                 <div className="grid gap-1.5"><Label>Observações</Label><Input value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} placeholder="Prazo de entrega, condições, etc." /></div>
                 <div className="flex items-center justify-between rounded-lg border border-border p-3">
                   <div className="flex items-center gap-2 text-sm"><Globe className="h-4 w-4 text-muted-foreground" /> Fornecedor internacional</div>

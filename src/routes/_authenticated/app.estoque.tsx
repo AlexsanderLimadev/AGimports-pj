@@ -26,9 +26,6 @@ export const Route = createFileRoute("/_authenticated/app/estoque")({
     ]);
   },
   component: Estoque,
-  errorComponent: ({ error }) => (
-    <div className="p-6 text-sm text-destructive">Erro: {error.message}</div>
-  ),
   notFoundComponent: () => <div className="p-6">Nada por aqui.</div>,
 });
 

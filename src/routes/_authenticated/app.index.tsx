@@ -22,9 +22,6 @@ export const Route = createFileRoute("/_authenticated/app/")({
   head: () => ({ meta: [{ title: "Dashboard · AG Tech" }] }),
   loader: ({ context }) => context.queryClient.ensureQueryData(statsOptions),
   component: Dashboard,
-  errorComponent: ({ error }) => (
-    <div className="p-6 text-sm text-destructive">Erro: {error.message}</div>
-  ),
   notFoundComponent: () => <div className="p-6">Nada por aqui.</div>,
 });
 

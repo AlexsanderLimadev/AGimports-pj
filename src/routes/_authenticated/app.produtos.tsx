@@ -44,6 +44,9 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { avisarComDesfazer } from "@/lib/desfazer";
+import { productSchema } from "@/lib/products.functions";
+import { errosPorCampo } from "@/lib/campos";
+import { ErroCampo, bordaErro } from "@/components/campo-erro";
 
 const productsOptions = queryOptions({ queryKey: ["products"], queryFn: () => listProducts() });
 const categoriesOptions = queryOptions({ queryKey: ["categories"], queryFn: () => listCategories() });
@@ -59,9 +62,6 @@ export const Route = createFileRoute("/_authenticated/app/produtos")({
     ]);
   },
   component: ProdutosPage,
-  errorComponent: ({ error }) => (
-    <div className="p-6 text-sm text-destructive">Erro: {error.message}</div>
-  ),
   notFoundComponent: () => <div className="p-6">Nada por aqui.</div>,
 });
 
@@ -314,22 +314,26 @@ function ProductDialog({
     active: initial?.active ?? true,
   });
 
+  const [erros, setErros] = useState<Record<string, string>>({});
+
+  const montarPayload = () => ({
+    sku: form.sku.trim(),
+    name: form.name.trim(),
+    description: form.description || null,
+    barcode: form.barcode || null,
+    category_id: form.category_id || null,
+    supplier_id: form.supplier_id || null,
+    cost_cents: Math.round(form.cost * 100),
+    price_cents: Math.round(form.price * 100),
+    stock_qty: Math.round(form.stock_qty),
+    min_stock: Math.round(form.min_stock),
+    image_url: form.image_url || null,
+    active: form.active,
+  });
+
   const mutation = useMutation({
     mutationFn: async () => {
-      const payload = {
-        sku: form.sku.trim(),
-        name: form.name.trim(),
-        description: form.description || null,
-        barcode: form.barcode || null,
-        category_id: form.category_id || null,
-        supplier_id: form.supplier_id || null,
-        cost_cents: Math.round(form.cost * 100),
-        price_cents: Math.round(form.price * 100),
-        stock_qty: Math.round(form.stock_qty),
-        min_stock: Math.round(form.min_stock),
-        image_url: form.image_url || null,
-        active: form.active,
-      };
+      const payload = montarPayload();
       if (initial) return updateProduct({ data: { id: initial.id, patch: payload } });
       return createProduct({ data: payload });
     },
@@ -347,8 +351,12 @@ function ProductDialog({
           <DialogTitle>{initial ? "Editar produto" : "Novo produto"}</DialogTitle>
         </DialogHeader>
         <form
+          noValidate
           onSubmit={(e) => {
             e.preventDefault();
+            const problemas = errosPorCampo(productSchema, montarPayload());
+            setErros(problemas);
+            if (Object.keys(problemas).length > 0) return;
             mutation.mutate();
           }}
           className="grid grid-cols-1 gap-4 sm:grid-cols-2"
@@ -356,11 +364,13 @@ function ProductDialog({
           <div className="sm:col-span-2 grid grid-cols-1 gap-3 sm:grid-cols-3">
             <div>
               <Label>SKU</Label>
-              <Input required value={form.sku} onChange={(e) => setForm({ ...form, sku: e.target.value })} />
+              <Input value={form.sku} aria-invalid={!!erros.sku} className={bordaErro(erros.sku)} onChange={(e) => setForm({ ...form, sku: e.target.value })} />
+              <ErroCampo mensagem={erros.sku} />
             </div>
             <div className="col-span-2">
               <Label>Nome</Label>
-              <Input required value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
+              <Input value={form.name} aria-invalid={!!erros.name} className={bordaErro(erros.name)} onChange={(e) => setForm({ ...form, name: e.target.value })} />
+              <ErroCampo mensagem={erros.name} />
             </div>
           </div>
           <div className="sm:col-span-2">
@@ -379,9 +389,12 @@ function ProductDialog({
             <Label>URL da imagem</Label>
             <Input
               value={form.image_url ?? ""}
+              aria-invalid={!!erros.image_url}
+              className={bordaErro(erros.image_url)}
               onChange={(e) => setForm({ ...form, image_url: e.target.value })}
               placeholder="https://..."
             />
+            <ErroCampo mensagem={erros.image_url} />
           </div>
           <div>
             <Label>Categoria</Label>
@@ -418,16 +431,22 @@ function ProductDialog({
             <Input
               type="number" step="0.01" min="0"
               value={form.cost}
+              aria-invalid={!!erros.cost_cents}
+              className={bordaErro(erros.cost_cents)}
               onChange={(e) => setForm({ ...form, cost: parseFloat(e.target.value) || 0 })}
             />
+            <ErroCampo mensagem={erros.cost_cents} />
           </div>
           <div>
             <Label>Preço (R$)</Label>
             <Input
               type="number" step="0.01" min="0"
               value={form.price}
+              aria-invalid={!!erros.price_cents}
+              className={bordaErro(erros.price_cents)}
               onChange={(e) => setForm({ ...form, price: parseFloat(e.target.value) || 0 })}
             />
+            <ErroCampo mensagem={erros.price_cents} />
           </div>
           <div>
             <Label>Estoque inicial</Label>
