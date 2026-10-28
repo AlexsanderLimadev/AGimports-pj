@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { AlertasConfig } from "@/components/alertas-config";
 import { ErrosRecentes } from "@/components/erros-recentes";
+import { MfaConfig } from "@/components/mfa-config";
 import { supabase } from "@/integrations/supabase/client";
 import { listAccessLogs } from "@/lib/access-log.functions";
 import { notificarErro } from "@/lib/notificar-erro";
