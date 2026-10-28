@@ -17,6 +17,8 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { AlertasConfig } from "@/components/alertas-config";
+import { ErrosRecentes } from "@/components/erros-recentes";
+import { MfaConfig } from "@/components/mfa-config";
 import { supabase } from "@/integrations/supabase/client";
 import { listAccessLogs } from "@/lib/access-log.functions";
 import { notificarErro } from "@/lib/notificar-erro";
@@ -38,7 +40,7 @@ const SEGURANCA: { titulo: string; detalhe: string; ativo: boolean }[] = [
   { titulo: "Dados isolados por conta", detalhe: "O banco só entrega os registros do dono da conta (RLS).", ativo: true },
   { titulo: "Limite de tentativas", detalhe: "Cadastros têm limite de requisições por minuto, contra abuso.", ativo: true },
   { titulo: "Registro de acessos", detalhe: "Login e logout ficam guardados e aparecem abaixo.", ativo: true },
-  { titulo: "Verificação em duas etapas", detalhe: "Ainda não disponível.", ativo: false },
+  { titulo: "Verificação em duas etapas", detalhe: "Disponível e opcional: ative no cartão abaixo. Quando ativa, o login pede o código do aplicativo.", ativo: true },
   { titulo: "Equipe e perfis de acesso", detalhe: "Hoje cada conta é de uma pessoa. Ainda não disponível.", ativo: false },
 ];
 
@@ -158,6 +160,8 @@ function Conf() {
         </ul>
       </SectionCard>
 
+      <MfaConfig />
+
       <SectionCard title="Log de acesso" description="Seus últimos acessos à plataforma" className="mt-4">
         {logs.length === 0 ? (
           <p className="p-4 text-xs text-muted-foreground">Nenhum acesso registrado ainda.</p>
@@ -172,6 +176,8 @@ function Conf() {
           </div>
         )}
       </SectionCard>
+
+      <ErrosRecentes />
 
       <SectionCard title="Privacidade e dados" description="O que você pode fazer com os dados" className="mt-4">
         <ul className="divide-y divide-border text-sm">
