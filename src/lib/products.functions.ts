@@ -3,6 +3,7 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import { z } from "zod";
 import { enforceRateLimit } from "@/lib/rate-limit.server";
 import { falhar } from "@/lib/erros.server";
+import { normalizarLink } from "@/lib/link-calc";
 
 // ---------- CATEGORIES ----------
 export const listCategories = createServerFn({ method: "GET" })
@@ -55,6 +56,16 @@ export const productSchema = z.object({
   stock_qty: z.number().int().min(0),
   min_stock: z.number().int().min(0),
   image_url: z.string().url().optional().nullable().or(z.literal("")),
+  // Link da página do produto (fornecedor, anúncio...). Só http(s); ver link-calc.
+  link_url: z
+    .string()
+    .max(2000)
+    .optional()
+    .nullable()
+    .superRefine((v, ctx) => {
+      const r = normalizarLink(v);
+      if (!r.ok) ctx.addIssue({ code: z.ZodIssueCode.custom, message: r.erro });
+    }),
   active: z.boolean().default(true),
 });
 
@@ -70,7 +81,18 @@ export const listProducts = createServerFn({ method: "GET" })
       .order("created_at", { ascending: false })
       .limit(500);
     if (error) falhar(error, "products");
-    return data ?? [];
+
+    // O link vem numa consulta à parte: se o SQL do link ainda não foi rodado (coluna não existe),
+    // a lista de produtos continua funcionando, só sem os links.
+    const { data: comLink, error: erroLink } = await context.supabase
+      .from("products")
+      .select("id, link_url")
+      .is("deleted_at", null)
+      .not("link_url", "is", null);
+    const links = new Map<string, string>();
+    if (!erroLink) for (const r of comLink ?? []) if (r.link_url) links.set(r.id, r.link_url);
+
+    return (data ?? []).map((p) => ({ ...p, link_url: links.get(p.id) ?? null }));
   });
 
 export const createProduct = createServerFn({ method: "POST" })
@@ -78,7 +100,16 @@ export const createProduct = createServerFn({ method: "POST" })
   .validator((d: unknown) => productSchema.parse(d))
   .handler(async ({ data, context }) => {
     await enforceRateLimit(context.supabase, context.userId, "createProduct", 40);
-    const payload = { ...data, user_id: context.userId, image_url: data.image_url || null };
+    // link_url só entra no insert quando há link, para cadastrar produto continuar funcionando
+    // antes de rodar o SQL 20261028_produto_link.sql.
+    const { link_url, ...resto } = data;
+    const link = normalizarLink(link_url);
+    const payload = {
+      ...resto,
+      user_id: context.userId,
+      image_url: data.image_url || null,
+      ...(link.ok && link.url ? { link_url: link.url } : {}),
+    };
     const { data: row, error } = await context.supabase
       .from("products")
       .insert(payload)
@@ -96,6 +127,10 @@ export const updateProduct = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     const patch = { ...data.patch };
     if (patch.image_url === "") patch.image_url = null;
+    if ("link_url" in patch) {
+      const link = normalizarLink(patch.link_url);
+      patch.link_url = link.ok ? link.url : null;
+    }
     const { error } = await context.supabase
       .from("products")
       .update(patch)

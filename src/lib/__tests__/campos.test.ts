@@ -39,4 +39,14 @@ describe("errosPorCampo", () => {
     const r = errosPorCampo(productSchema, { sku: "", name: "", cost_cents: -1, price_cents: -1, stock_qty: -1, min_stock: -1, image_url: "x" });
     for (const m of Object.values(r)) expect(m).not.toMatch(/—|–/);
   });
+
+  it("link do produto: aceita http(s), aceita vazio e recusa javascript:", () => {
+    const base = { sku: "A1", name: "X", cost_cents: 0, price_cents: 0, stock_qty: 0, min_stock: 0, active: true };
+    expect(errosPorCampo(productSchema, { ...base, link_url: "https://loja.com/p/1" })).toEqual({});
+    expect(errosPorCampo(productSchema, { ...base, link_url: "www.loja.com/p" })).toEqual({});
+    expect(errosPorCampo(productSchema, { ...base, link_url: "" })).toEqual({});
+    expect(errosPorCampo(productSchema, { ...base, link_url: null })).toEqual({});
+    expect(errosPorCampo(productSchema, { ...base, link_url: "javascript:alert(1)" }).link_url).toMatch(/http/);
+    expect(errosPorCampo(productSchema, { ...base, link_url: "comprar aqui" }).link_url).toBeTruthy();
+  });
 });

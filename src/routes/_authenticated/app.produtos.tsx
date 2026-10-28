@@ -3,7 +3,7 @@ import { queryOptions, useMutation, useQueryClient, useSuspenseQuery } from "@ta
 import { useMemo, useRef, useState } from "react";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { toast } from "sonner";
-import { Pencil, Plus, Search, Trash2 } from "lucide-react";
+import { ExternalLink, Pencil, Plus, Search, Trash2 } from "lucide-react";
 import { PageHeader, SectionCard } from "@/components/ui-bits";
 import {
   createProduct,
@@ -47,6 +47,7 @@ import { avisarComDesfazer } from "@/lib/desfazer";
 import { productSchema } from "@/lib/products.functions";
 import { errosPorCampo } from "@/lib/campos";
 import { ErroCampo, bordaErro } from "@/components/campo-erro";
+import { nomeDoSite, normalizarLink } from "@/lib/link-calc";
 
 const productsOptions = queryOptions({ queryKey: ["products"], queryFn: () => listProducts() });
 const categoriesOptions = queryOptions({ queryKey: ["categories"], queryFn: () => listCategories() });
@@ -87,7 +88,8 @@ function ProdutosPage() {
       (p) =>
         p.name.toLowerCase().includes(term) ||
         p.sku.toLowerCase().includes(term) ||
-        (p.barcode ?? "").toLowerCase().includes(term),
+        (p.barcode ?? "").toLowerCase().includes(term) ||
+        (p.link_url ?? "").toLowerCase().includes(term),
     );
   }, [products, q]);
 
@@ -141,7 +143,7 @@ function ProdutosPage() {
             <input
               value={q}
               onChange={(e) => setQ(e.target.value)}
-              placeholder="Buscar SKU, nome, código de barras..."
+              placeholder="Buscar SKU, nome, código ou link..."
               className="h-8 w-64 rounded-md border border-border bg-background pl-7 pr-2 text-xs focus:border-primary/50 focus:outline-none"
             />
           </div>
@@ -222,6 +224,18 @@ function ProdutosPage() {
                       </td>
                       <td className="px-4 py-2.5 text-right">
                         <div className="flex justify-end gap-1">
+                          {p.link_url && (
+                            <a
+                              href={p.link_url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              title={`Abrir ${nomeDoSite(p.link_url)}`}
+                              aria-label={`Abrir o link de ${p.name} (${nomeDoSite(p.link_url)})`}
+                              className="rounded-md p-1.5 hover:bg-accent"
+                            >
+                              <ExternalLink className="h-3.5 w-3.5" />
+                            </a>
+                          )}
                           <button
                             onClick={() => setEditing(p)}
                             className="rounded-md p-1.5 hover:bg-accent"
@@ -311,6 +325,7 @@ function ProductDialog({
     stock_qty: initial?.stock_qty ?? 0,
     min_stock: initial?.min_stock ?? 0,
     image_url: initial?.image_url ?? "",
+    link_url: initial?.link_url ?? "",
     active: initial?.active ?? true,
   });
 
@@ -328,6 +343,9 @@ function ProductDialog({
     stock_qty: Math.round(form.stock_qty),
     min_stock: Math.round(form.min_stock),
     image_url: form.image_url || null,
+    // Só envia o link quando há algo a gravar ou a apagar: assim cadastrar produto continua
+    // funcionando mesmo antes de rodar o SQL 20261028_produto_link.sql.
+    ...(form.link_url.trim() || initial?.link_url ? { link_url: form.link_url.trim() || null } : {}),
     active: form.active,
   });
 
@@ -395,6 +413,36 @@ function ProductDialog({
               placeholder="https://..."
             />
             <ErroCampo mensagem={erros.image_url} />
+          </div>
+          <div className="sm:col-span-2">
+            <div className="flex items-center justify-between">
+              <Label>Link do produto</Label>
+              {(() => {
+                const l = normalizarLink(form.link_url);
+                return l.ok && l.url ? (
+                  <a
+                    href={l.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 text-xs text-primary hover:underline"
+                  >
+                    Abrir {nomeDoSite(l.url)} <ExternalLink className="h-3 w-3" />
+                  </a>
+                ) : null;
+              })()}
+            </div>
+            <Input
+              value={form.link_url}
+              aria-invalid={!!erros.link_url}
+              className={bordaErro(erros.link_url)}
+              onChange={(e) => setForm({ ...form, link_url: e.target.value })}
+              onBlur={() => {
+                const r = normalizarLink(form.link_url);
+                if (r.ok && r.url && r.url !== form.link_url) setForm({ ...form, link_url: r.url });
+              }}
+              placeholder="Cole aqui o endereço da página do produto (fornecedor, anúncio, catálogo)"
+            />
+            <ErroCampo mensagem={erros.link_url} />
           </div>
           <div>
             <Label>Categoria</Label>
