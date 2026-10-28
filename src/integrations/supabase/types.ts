@@ -629,6 +629,7 @@ export type Database = {
           description: string | null
           id: string
           image_url: string | null
+          link_url: string | null
           min_stock: number
           name: string
           price_cents: number
@@ -648,6 +649,7 @@ export type Database = {
           description?: string | null
           id?: string
           image_url?: string | null
+          link_url?: string | null
           min_stock?: number
           name: string
           price_cents?: number
@@ -667,6 +669,7 @@ export type Database = {
           description?: string | null
           id?: string
           image_url?: string | null
+          link_url?: string | null
           min_stock?: number
           name?: string
           price_cents?: number
