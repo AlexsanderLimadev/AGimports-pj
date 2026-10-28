@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate, useSearch } from "@tanstack/react-router";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -7,6 +7,7 @@ import { z } from "zod";
 import { ArrowRight, Loader2 } from "lucide-react";
 import { AGLogoFull, Grain, Grid, useMouseRel } from "@/components/brand-fx";
 import { logAccess } from "@/lib/access-log.functions";
+import { codigoValido, exigeSegundaEtapa, fatoresTotpVerificados, limparCodigo, traduzirErroMfa } from "@/lib/mfa-calc";
 
 const searchSchema = z.object({
   // Só caminho interno do próprio site ("/app/..."). Qualquer outra coisa (https://..., //site.com,
@@ -25,7 +26,7 @@ export const Route = createFileRoute("/auth")({
   component: AuthPage,
 });
 
-type Mode = "signin" | "signup" | "forgot";
+type Mode = "signin" | "signup" | "forgot" | "mfa";
 
 // Mesma foto de fundo do design do Figma Make (arte de composição, sem
 // pessoa/identidade real — segue as regras de direitos autorais).
@@ -41,6 +42,8 @@ function AuthPage() {
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
   const [loading, setLoading] = useState(false);
+  const [codigo, setCodigo] = useState("");
+  const [fatorMfa, setFatorMfa] = useState<string | null>(null);
 
   const pageRef = useRef<HTMLDivElement>(null);
   const cardRef = useRef<HTMLDivElement>(null);
@@ -64,11 +67,29 @@ function AuthPage() {
     }
   };
 
+  // Já existe sessão? Se a pessoa ativou a verificação em duas etapas e ainda não digitou o
+  // código, mostra o passo do código em vez de entrar direto.
+  const entrarOuPedirCodigo = useCallback(async (): Promise<boolean> => {
+    const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+    if (exigeSegundaEtapa(aal)) {
+      const { data: lista } = await supabase.auth.mfa.listFactors();
+      const fator = fatoresTotpVerificados(lista?.all)[0];
+      if (fator) {
+        setFatorMfa(fator.id);
+        setCodigo("");
+        setMode("mfa");
+        return false;
+      }
+    }
+    navigate({ to: redirectTo ?? "/app", replace: true });
+    return true;
+  }, [navigate, redirectTo]);
+
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
-      if (data.session) navigate({ to: redirectTo ?? "/app", replace: true });
+      if (data.session) void entrarOuPedirCodigo();
     });
-  }, [navigate, redirectTo]);
+  }, [entrarOuPedirCodigo]);
 
   // Traduz as mensagens mais comuns que o Supabase Auth devolve (em inglês,
   // técnicas) pra algo que a pessoa realmente entende. Se a mensagem não
@@ -91,8 +112,17 @@ function AuthPage() {
       if (mode === "signin") {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
-        toast.success("Bem-vindo de volta!");
         logAccessFn({ data: { event: "sign_in", userAgent: navigator.userAgent } }).catch(() => {});
+        if (await entrarOuPedirCodigo()) toast.success("Bem-vindo de volta!");
+      } else if (mode === "mfa") {
+        if (!fatorMfa || !codigoValido(codigo)) return;
+        const { error } = await supabase.auth.mfa.challengeAndVerify({ factorId: fatorMfa, code: codigo });
+        if (error) {
+          toast.error(traduzirErroMfa(error.message));
+          setCodigo("");
+          return;
+        }
+        toast.success("Bem-vindo de volta!");
         navigate({ to: redirectTo ?? "/app", replace: true });
       } else if (mode === "signup") {
         const { data, error } = await supabase.auth.signUp({
@@ -224,15 +254,17 @@ function AuthPage() {
               {mode === "signin" && "Bem-vindo de volta"}
               {mode === "signup" && "Criar sua conta"}
               {mode === "forgot" && "Recuperar senha"}
+              {mode === "mfa" && "Verificação em duas etapas"}
             </h1>
             <p className="text-[12px] text-white/28">
               {mode === "signin" && "Entre para acessar o painel"}
               {mode === "signup" && "Comece a gerenciar seu negócio em minutos"}
               {mode === "forgot" && "Enviaremos um link para redefinir sua senha"}
+              {mode === "mfa" && "Digite o código de 6 dígitos do seu aplicativo autenticador"}
             </p>
           </div>
 
-          {mode !== "forgot" && (
+          {mode !== "forgot" && mode !== "mfa" && (
             <>
               <button
                 type="button"
@@ -263,17 +295,33 @@ function AuthPage() {
                 required
               />
             )}
-            <FloatInput
-              id="email"
-              label="E-mail"
-              type="email"
-              placeholder="voce@empresa.com"
-              value={email}
-              onChange={setEmail}
-              autoComplete="email"
-              required
-            />
-            {mode !== "forgot" && (
+            {mode !== "mfa" && (
+              <FloatInput
+                id="email"
+                label="E-mail"
+                type="email"
+                placeholder="voce@empresa.com"
+                value={email}
+                onChange={setEmail}
+                autoComplete="email"
+                required
+              />
+            )}
+            {mode === "mfa" && (
+              <FloatInput
+                id="codigo"
+                label="Código de 6 dígitos"
+                placeholder="000000"
+                value={codigo}
+                onChange={(v) => setCodigo(limparCodigo(v))}
+                autoComplete="one-time-code"
+                inputMode="numeric"
+                maxLength={7}
+                autoFocus
+                required
+              />
+            )}
+            {mode !== "forgot" && mode !== "mfa" && (
               <FloatInput
                 id="password"
                 label="Senha"
@@ -303,7 +351,7 @@ function AuthPage() {
             <button
               ref={btnRef}
               type="submit"
-              disabled={loading}
+              disabled={loading || (mode === "mfa" && !codigoValido(codigo))}
               onMouseMove={onMag}
               onMouseEnter={() => setMagOn(true)}
               onMouseLeave={() => {
@@ -325,6 +373,7 @@ function AuthPage() {
                   {mode === "signin" && "Entrar"}
                   {mode === "signup" && "Criar conta"}
                   {mode === "forgot" && "Enviar link"}
+                  {mode === "mfa" && "Verificar"}
                   <ArrowRight size={13} className="group-hover:translate-x-0.5 transition-transform duration-150" />
                 </>
               )}
@@ -351,6 +400,19 @@ function AuthPage() {
             {mode === "forgot" && (
               <button onClick={() => setMode("signin")} className="text-white/40 hover:text-white/65 transition-colors">
                 ← Voltar ao login
+              </button>
+            )}
+            {mode === "mfa" && (
+              <button
+                onClick={async () => {
+                  await supabase.auth.signOut();
+                  setCodigo("");
+                  setFatorMfa(null);
+                  setMode("signin");
+                }}
+                className="text-white/40 hover:text-white/65 transition-colors"
+              >
+                ← Usar outra conta
               </button>
             )}
           </div>
